@@ -93,7 +93,7 @@
                     </thead>
                     <tbody>
                         {% for challenge in challenges %}
-                        <tr data-href="{{ url_for('admin.challenges_detail', challenge_id=challenge.id) }}">
+                        <tr {% if not is_jury() %} data-href="{{ url_for('admin.challenges_detail', challenge_id=challenge.id) }}">
                             <td class="d-block border-right text-center" data-checkbox>
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" value="{{ challenge.id }}"
@@ -101,8 +101,13 @@
                                 </div>
                             </td>
                             <td class="text-center">{{ challenge.id }}</td>
-                            <td><a href="{{ url_for('admin.challenges_detail', challenge_id=challenge.id) }}">{{
-                                    challenge.name }}</a></td>
+                            {% if not is_jury() %}
+                            <a href="{{ url_for('admin.challenges_detail', challenge_id=challenge.id) }}">
+                                {{ challenge.name }}
+                            </a>
+                            {% else %}
+                            {{ challenge.name }}
+                            {% endif %}
                             <td>{{ challenge.category }}</td>
                             <td class="text-center">{{ challenge.value }}</td>
                             <td class="text-center">{{ challenge.type }}</td>
@@ -148,6 +153,8 @@
                             {% endif %}
 
                         </tr>
+                        {% endif %}
+
                         {% endfor %}
                     </tbody>
                 </table>

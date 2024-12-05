@@ -9,11 +9,11 @@ from CTFd.constants.envvars import API_URL_CONTROLSERVER, PRIVATE_KEY
 from CTFd.models import Challenges, Teams
 import json
 
-from CTFd.utils.decorators import admin_or_jury
+from CTFd.utils.decorators import admin_or_challenge_writer_only_or_jury, admin_or_jury
 from CTFd.utils.connector.multiservice_connector import monitoring_control
 
 @admin.route("/admin/monitoring")
-@admin_or_jury
+@admin_or_challenge_writer_only_or_jury
 def monitoring():
     monitor = machine_performance()
     if monitor is None:
@@ -23,7 +23,7 @@ def monitoring():
 
 # Modified API to include more metrics
 @admin.route("/api/performance", methods=["POST"])
-@admin_or_jury
+@admin_or_challenge_writer_only_or_jury
 @bypass_csrf_protection
 def machine_performance():
     return monitoring_control()

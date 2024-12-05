@@ -206,11 +206,14 @@
 		</h3>
 		<hr class="w-50">
 		<div class="pt-3">
+			{% if not is_jury() %}
 
 			<a class="edit-team text-dark">
 				<i class="btn-fa fas fa-pencil-alt fa-2x px-2" data-toggle="tooltip" data-placement="top"
 					title="Edit Team"></i>
 			</a>
+			{% endif %}
+
 
 			<a class="invite-team text-dark">
 				<i class="btn-fa fas fa-ticket-alt fa-2x px-2" data-toggle="tooltip" data-placement="top"

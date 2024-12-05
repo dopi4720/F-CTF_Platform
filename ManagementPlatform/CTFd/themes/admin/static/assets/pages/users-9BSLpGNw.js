@@ -25,4 +25,4 @@ import{$ as e,e as a,C as l,A as u}from"./main-Cr4k92Ug.js";function d(r){let t=
         </select>
       </div>
     </form>
-    `),button:"Submit",success:function(){let i=e("#users-bulk-edit").serializeJSON(!0);const o=[];for(var n of t)o.push(l.fetch(`/api/v1/users/${n}`,{method:"PATCH",body:JSON.stringify(i)}));Promise.all(o).then(p=>{window.location.reload()})}}),document.querySelector("#is_jury").value==="true"&&(document.querySelector("#Verified").style.display="none",document.querySelector("#Hidden").style.display="none")}e(()=>{e("#users-delete-button").click(d),e("#users-edit-button").click(c)});
+    `),button:"Submit",success:function(){let i=e("#users-bulk-edit").serializeJSON(!0);const o=[];for(var n of t)o.push(l.fetch(`/api/v1/users/${n}`,{method:"PATCH",body:JSON.stringify(i)}));Promise.all(o).then(p=>{window.location.reload()})}}),document.querySelector("#is_jury").value=="true"&&(document.querySelector("#Verified").style.display="none",document.querySelector("#Hidden").style.display="none")}e(()=>{e("#users-delete-button").click(d),e("#users-edit-button").click(c)});

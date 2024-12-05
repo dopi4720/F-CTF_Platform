@@ -18,4 +18,4 @@ import{$ as e,e as d,C as l,A as u}from"./main-Cr4k92Ug.js";function r(s){let t=
       </div>
     </form>
     
-    `),button:"Submit",success:function(){let a=e("#teams-bulk-edit").serializeJSON(!0);const o=[];for(var n of t)o.push(l.fetch(`/api/v1/teams/${n}`,{method:"PATCH",body:JSON.stringify(a)}));Promise.all(o).then(m=>{window.location.reload()})}}),document.querySelector("#is_jury").value==="true"&&(document.querySelector("#Hidden").style.display="none")}e(()=>{e("#teams-delete-button").click(r),e("#teams-edit-button").click(c)});
+    `),button:"Submit",success:function(){let a=e("#teams-bulk-edit").serializeJSON(!0);const o=[];for(var n of t)o.push(l.fetch(`/api/v1/teams/${n}`,{method:"PATCH",body:JSON.stringify(a)}));Promise.all(o).then(m=>{window.location.reload()})}}),document.querySelector("#is_jury").value=="true"&&(document.querySelector("#Hidden").style.display="none")}e(()=>{e("#teams-delete-button").click(r),e("#teams-edit-button").click(c)});
