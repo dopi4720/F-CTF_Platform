@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ControlServer.Tests": {
+      "commandName": "Project",
+      "remoteDebugEnabled": false
+    }
+  }
+}
