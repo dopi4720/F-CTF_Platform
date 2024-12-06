@@ -250,7 +250,7 @@ namespace ChallengeManagementServer.Utils
             //Port forward into FreePort
             _ = Task.Run(async () =>
             {
-                await CmdHelper.ExecuteBashCommandAsync("", $"kubectl port-forward {PodName} {FreePort}:{ConfigSettings["TargetPort"]}", true);
+                await CmdHelper.ExecuteBashCommandAsync("", $"kubectl port-forward {PodName} {FreePort}:{ConfigSettings["TargetPort"]} | grep -v \"Handling connection\"", true);
             });
             await Task.Delay(1500);
 
