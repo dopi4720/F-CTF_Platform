@@ -1,6 +1,6 @@
-﻿using ChallengeManagementServer.DTO.GetClusterStatisticResponseDTO;
-using ChallengeManagementServer.DTO.PerformanceStatDTO;
+﻿using ChallengeManagementServer.K8sServerResponse.GetClusterStatisticResponseDTO;
 using ControlCenterServer.Models;
+using ChallengeManagementServer.DTO.PerformanceStatDTO;
 using StackExchange.Redis;
 
 namespace ChallengeManagementServer.ServiceInterfaces

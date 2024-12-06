@@ -1,4 +1,4 @@
-﻿using ChallengeManagementServer.DTO.ClusterAllocateResponseDTO;
+﻿using ChallengeManagementServer.K8sServerResponse.ClusterAllocateResponseDTO;
 using Newtonsoft.Json;
 using ResourceShared.Configs;
 using ResourceShared.Utils;

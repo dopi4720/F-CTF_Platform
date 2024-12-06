@@ -1,4 +1,4 @@
-﻿namespace ChallengeManagementServer.DTO.ClusterAllocateResponseDTO
+﻿namespace ChallengeManagementServer.K8sServerResponse.ClusterAllocateResponseDTO
 {
     public class ClusterAllocateResponseInfo
     {

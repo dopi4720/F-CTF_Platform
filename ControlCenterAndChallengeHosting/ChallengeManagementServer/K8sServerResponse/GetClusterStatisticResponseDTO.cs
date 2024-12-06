@@ -1,4 +1,4 @@
-﻿namespace ChallengeManagementServer.DTO.GetClusterStatisticResponseDTO
+﻿namespace ChallengeManagementServer.K8sServerResponse.GetClusterStatisticResponseDTO
 {
     public class ClusterStatisticResponseInfo
     {
