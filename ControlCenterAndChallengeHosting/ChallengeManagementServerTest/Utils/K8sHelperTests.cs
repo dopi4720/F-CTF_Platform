@@ -104,7 +104,7 @@ namespace ChallengeManagementServerTest.Utils
         public async Task CanCallClosePortAsync()
         {
             // Act
-            var exception = await Assert.ThrowsAsync<Exception>(() => _testClass.ClosePort(2));
+            var exception = await Assert.ThrowsAsync<Exception>(() => _testClass.StopChallengeAsync(2));
 
             // Assert
             Assert.Empty(exception.Message);

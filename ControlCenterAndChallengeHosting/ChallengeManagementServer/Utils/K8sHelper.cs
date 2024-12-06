@@ -295,7 +295,7 @@ namespace ChallengeManagementServer.Utils
             return ConnectionString;
         }
 
-        public async Task ClosePort(int TeamId)
+        public async Task StopChallengeAsync(int TeamId)
         {
             string DeploymentName = $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}-{TeamId}";
             var ConfigSettings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(ProjectPath, "settings.json")));
@@ -360,7 +360,13 @@ namespace ChallengeManagementServer.Utils
 
                 //reload NGINX
                 await CmdHelper.ExecuteBashCommandAsync("", "sudo systemctl reload nginx", false);
-              //  await Console.Out.WriteLineAsync("NGINX reloaded");
+                //  await Console.Out.WriteLineAsync("NGINX reloaded");
+
+                //Delete deployment
+                await CmdHelper.ExecuteBashCommandAsync("", $"kubectl delete deployment {DeploymentName}", true);
+
+                //Delete rule
+                await CmdHelper.ExecuteBashCommandAsync("", $"sudo ufw delete allow {TargetPort}/tcp", false);
             }
             catch (Exception ex)
             {

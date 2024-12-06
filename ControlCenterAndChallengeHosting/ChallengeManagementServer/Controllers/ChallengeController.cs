@@ -48,7 +48,7 @@ namespace ChallengeManagementServer.Controllers
                     {
                         Console.WriteLine($"Check deploymentList {deployment.TeamId} - {deployment.ChallengeId}");
 
-                        await StopChallengeDeleteDeploymentAndCache(ChallengeId, deployment.TeamId);
+                        await StopChallengeAsync(ChallengeId, deployment.TeamId);
                         await Task.Delay(3000);
                     }
                 }
@@ -108,7 +108,7 @@ namespace ChallengeManagementServer.Controllers
 
                        foreach (var deployment in deploymentList)
                        {
-                           await StopChallengeDeleteDeploymentAndCache(ChallengeId, deployment.TeamId);
+                           await StopChallengeAsync(ChallengeId, deployment.TeamId);
                        }
 
                        string extractionDistPath = Path.Combine(ChallengeManagePathConfigs.ChallengeBasePath, $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}");
@@ -124,7 +124,7 @@ namespace ChallengeManagementServer.Controllers
                 {
                     _ = Task.Run(async () =>
                     {
-                        await StopChallengeDeleteDeploymentAndCache(ChallengeId, -1);
+                        await StopChallengeAsync(ChallengeId, -1);
                         string extractionDistPath = Path.Combine(ChallengeManagePathConfigs.ChallengeBasePath, $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}");
                         await k8SHelper.RemoveImageFromDiskAsync();
                         if (Directory.Exists(extractionDistPath))
@@ -222,7 +222,7 @@ namespace ChallengeManagementServer.Controllers
                     teamName = "preview";
                 }
 
-                await StopChallengeDeleteDeploymentAndCache(instance.ChallengeId, instance.TeamId);
+                await StopChallengeAsync(instance.ChallengeId, instance.TeamId);
 
                 return Ok(new GeneralView
                 {
@@ -240,13 +240,11 @@ namespace ChallengeManagementServer.Controllers
             }
         }
 
-        private async Task StopChallengeDeleteDeploymentAndCache(int ChallengeId, int TeamId)
+        private async Task StopChallengeAsync(int ChallengeId, int TeamId)
         {
             try
             {
                 _ = await _challengeService.StopAsync(ChallengeId, TeamId);
-                string DeploymentName = $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}-{TeamId}";
-                await CmdHelper.ExecuteBashCommandAsync("", $"kubectl delete deployment {DeploymentName}", true);
 
                 RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
                 var deploymentList = await redisHelper.GetFromCacheAsync<List<DeploymentInfo>>(RedisConfigs.RedisChallengeDeploymentListKey);

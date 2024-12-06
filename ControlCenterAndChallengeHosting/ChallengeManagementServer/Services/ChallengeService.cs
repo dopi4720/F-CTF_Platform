@@ -226,7 +226,7 @@ namespace ChallengeManagementServer.Services
             try
             {
                 K8sHelper k8s = new K8sHelper(ChallengeId, _connectionMultiplexer);
-                await k8s.ClosePort(TeamId);
+                await k8s.StopChallengeAsync(TeamId);
                 return true;
             }
             catch (Exception)
