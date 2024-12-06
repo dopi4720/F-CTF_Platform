@@ -67,7 +67,7 @@ namespace ChallengeManagementServer.Controllers
                     {
                         await Console.Out.WriteLineAsync("Error in background task: " + ex.Message);
                         #region Update challenge status to CTFd
-                        //await _challengeService.UpdateChallengeStatusToCTFd(ChallengeId, ex.Message, "DEPLOY_FAILED");
+                        await _challengeService.UpdateChallengeStatusToCTFd(ChallengeId, ex.Message, "DEPLOY_FAILED");
                         #endregion
                     }
                 });

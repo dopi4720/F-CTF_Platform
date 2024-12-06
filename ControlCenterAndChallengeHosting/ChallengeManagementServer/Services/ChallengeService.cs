@@ -77,6 +77,7 @@ namespace ChallengeManagementServer.Services
                 throw new Exception(ex.Message + $"\n\n{DeployLogs}");
             }
         }
+
         public async Task UpdateChallengeStatusToCTFd(int ChallengeId, string DeployLogs, string status, string ImageLink = "{}")
         {
             #region Update challenge status to CTFd
