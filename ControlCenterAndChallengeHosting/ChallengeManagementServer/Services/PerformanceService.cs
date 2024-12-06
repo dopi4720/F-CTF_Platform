@@ -2,8 +2,8 @@
 using System.Diagnostics;
 using ChallengeManagementServer.Configs;
 using ChallengeManagementServer.DTO;
-using ChallengeManagementServer.DTO.GetClusterStatisticResponseDTO;
-using ChallengeManagementServer.DTO.GetPodStatisticResponseDTO;
+using ChallengeManagementServer.K8sServerResponse.GetClusterStatisticResponseDTO;
+using ChallengeManagementServer.K8sServerResponse.GetPodStatisticResponseDTO;
 using ChallengeManagementServer.DTO.PerformanceStatDTO;
 using ChallengeManagementServer.ServiceInterfaces;
 using ChallengeManagementServer.Utils;
