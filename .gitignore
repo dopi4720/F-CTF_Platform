@@ -366,7 +366,6 @@ FodyWeavers.xsd
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*.ini
 .env
 # C extensions
 *.so

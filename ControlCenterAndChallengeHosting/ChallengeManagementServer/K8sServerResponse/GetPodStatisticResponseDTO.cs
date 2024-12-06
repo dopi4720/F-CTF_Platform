@@ -1,4 +1,4 @@
-﻿namespace ChallengeManagementServer.DTO.GetPodStatisticResponseDTO
+﻿namespace ChallengeManagementServer.K8sServerResponse.GetPodStatisticResponseDTO
 {
     public class GetPodStatisticResponseDTO
     {
