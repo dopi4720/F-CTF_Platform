@@ -21,7 +21,7 @@ def get_standings(count=None, bracket_id=None, admin=False, fields=None):
     if fields is None:
         fields = []
     Model = get_model()
-
+    print(f"Arguments received: admin={admin}")
     scores = (
         db.session.query(
             Solves.account_id.label("account_id"),
@@ -49,7 +49,10 @@ def get_standings(count=None, bracket_id=None, admin=False, fields=None):
     Filter out solves and awards that are before a specific time point.
     """
     freeze = get_config("freeze")
+    
+
     if not admin and freeze:
+        
         scores = scores.filter(Solves.date < unix_time_to_utc(freeze))
         awards = awards.filter(Awards.date < unix_time_to_utc(freeze))
 
@@ -61,6 +64,8 @@ def get_standings(count=None, bracket_id=None, admin=False, fields=None):
     """
     Sum each of the results by the team id to get their score.
     """
+    print('a', scores)
+    print('b', awards)
     sumscores = (
         db.session.query(
             results.columns.account_id,
@@ -257,6 +262,7 @@ def get_user_standings(count=None, bracket_id=None, admin=False, fields=None):
 
     freeze = get_config("freeze")
     if not admin and freeze:
+        print(freeze)
         scores = scores.filter(Solves.date < unix_time_to_utc(freeze))
         awards = awards.filter(Awards.date < unix_time_to_utc(freeze))
 
@@ -376,20 +382,15 @@ def get_team_challenge_counts(team_name=None, min_solved_count=None, hidden=None
         .order_by(func.count(Solves.challenge_id).desc())
     )
 
-    
     if team_name:
         query = query.filter(Teams.name.ilike(f"%{team_name}%"))
 
- 
     if min_solved_count is not None:
         query = query.having(func.count(Solves.challenge_id) >= min_solved_count)
 
-   
     if not is_admin:
-        
         query = query.filter(Teams.hidden == False, Teams.banned == False)
     else:
-       
         if hidden is not None:
             query = query.filter(Teams.hidden == hidden)
 
@@ -401,20 +402,21 @@ def get_team_challenge_counts(team_name=None, min_solved_count=None, hidden=None
 
 
 def get_teams_cleared_all_challenges_by_topic(team_name=None, country=None, user_is_admin=False):
+    # Lấy danh sách các chủ đề (categories)
     topics = db.session.query(Challenges.category).distinct().all()
     cleared_teams = {}
 
     for topic in topics:
         topic_name = topic[0]
 
-        # Get challenge IDs for the topic
+        # Lấy danh sách ID của các bài trong chủ đề
         challenge_ids = db.session.query(Challenges.id).filter(Challenges.category == topic_name).all()
         challenge_ids = [challenge.id for challenge in challenge_ids]
 
         if not challenge_ids:
-            continue  # Skip if no challenges exist for the topic
+            continue  # Bỏ qua nếu không có bài trong chủ đề
 
-        # Query for teams that solved all challenges in the topic
+        # Truy vấn các đội đã giải bài
         teams_query = (
             db.session.query(
                 Teams.id.label("team_id"),
@@ -427,29 +429,46 @@ def get_teams_cleared_all_challenges_by_topic(team_name=None, country=None, user
             .group_by(Teams.id)
         )
 
-        # Filter for visible teams if user is not an admin
+        # Lọc các đội nếu user không phải admin
         if not user_is_admin:
             teams_query = teams_query.filter(Teams.hidden.is_(False), Teams.banned.is_(False))
 
+        # Lọc theo tên đội và quốc gia nếu có
         if team_name:
             teams_query = teams_query.filter(Teams.name.ilike(f"%{team_name}%"))
         if country:
             teams_query = teams_query.filter(Teams.country.ilike(f"%{country}%"))
 
-        # Teams that solved all challenges
+        # Tìm các đội đã giải hết tất cả bài trong chủ đề
         all_cleared_teams = teams_query.having(func.count(Solves.challenge_id) == len(challenge_ids)).all()
 
         if all_cleared_teams:
-            cleared_teams[topic_name] = sorted(
-                all_cleared_teams,
-                key=lambda t: t.last_submission_time,
-                reverse=True
-            )
+            # Nếu có đội giải hết, thêm trạng thái CLEARED
+            cleared_teams[topic_name] = [
+                {
+                    "team_id":team.team_id,
+                    "team_name": team.team_name,
+                    "status": "CLEARED",
+                    "last_submission_time": team.last_submission_time,
+                }
+                for team in all_cleared_teams
+            ]
         else:
-            # Rank teams by number of challenges solved in the topic if no team cleared all
-            top_teams = teams_query.order_by(func.count(Solves.challenge_id).desc(), func.max(Solves.date).desc()).all()
-            if top_teams:
-                cleared_teams[topic_name] = top_teams
+            # Nếu không đội nào giải hết, xếp hạng theo số bài giải được và thời gian nhanh nhất
+            top_teams = teams_query.order_by(
+                func.count(Solves.challenge_id).desc(),
+                func.max(Solves.date).asc()
+            ).all()
+            cleared_teams[topic_name] = [
+                {
+                    "team_id":team.team_id,
+                    "team_name": team.team_name,
+                    
+                    "status": f"{team.solved_count} solved",
+                    "last_submission_time": team.last_submission_time,
+                }
+                for team in top_teams
+            ]
 
     return cleared_teams
 

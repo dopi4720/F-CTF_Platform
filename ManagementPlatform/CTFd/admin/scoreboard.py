@@ -1,5 +1,6 @@
 from collections import defaultdict
 from flask import render_template
+import pytz
 from CTFd.admin import admin
 from CTFd.utils.config import is_teams_mode
 
@@ -15,9 +16,12 @@ from CTFd.utils.scores import (
 from CTFd.models import Achievements, Awards, Challenges, Solves, Teams, Users, db
 from sqlalchemy import and_
 
+
+
 @admin.route("/admin/scoreboard")
 @admin_or_jury
 def scoreboard_listing():
+    
     standings = get_standings(admin=True)
     user_standings = get_user_standings(admin=True) if is_teams_mode() else None
     top_submission = getSubmitStandings(admin=True)
@@ -76,7 +80,6 @@ def scoreboard_listing():
         for achievement in first_bloods
     ]
     
-    standings = get_standings()
     team_ids = [team.account_id for team in standings]
 
     solves = Solves.query.filter(Solves.account_id.in_(team_ids)).all()

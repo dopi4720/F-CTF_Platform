@@ -5,6 +5,7 @@ from collections import namedtuple
 
 from flask import current_app as app
 from flask import send_file, send_from_directory, url_for
+import pytz
 
 from CTFd.utils.config.pages import get_pages
 from CTFd.utils.decorators import admins_only as admins_only_wrapper
@@ -178,6 +179,17 @@ def get_plugin_names():
             plugins.append(module_name)
     return plugins
 
+def convert_to_local_time(utc_time):
+    # Chuyển đổi thời gian UTC sang múi giờ địa phương (UTC +7)
+    local_timezone = pytz.timezone("Asia/Ho_Chi_Minh")  # Bạn có thể thay đổi múi giờ phù hợp
+    utc_time = utc_time.replace(tzinfo=pytz.utc)  # Gán múi giờ UTC cho thời gian
+    local_time = utc_time.astimezone(local_timezone)  # Chuyển đổi sang múi giờ địa phương
+    return local_time
+
+def strftime_filter(value, format='%Y-%m-%d %H:%M:%S'):
+    if value:
+        return value.strftime(format)
+    return 'N/A'
 
 def init_plugins(app):
     """
@@ -207,3 +219,5 @@ def init_plugins(app):
 
     app.jinja_env.globals.update(get_admin_plugin_menu_bar=get_admin_plugin_menu_bar)
     app.jinja_env.globals.update(get_user_page_menu_bar=get_user_page_menu_bar)
+    app.jinja_env.filters['convert_to_local_time'] = convert_to_local_time
+    app.jinja_env.filters['strftime'] = strftime_filter

@@ -6,6 +6,11 @@
         <h1>Scoreboard</h1>
     </div>
 </div>
+<style>
+    .custom-tab-padding {
+        padding: 10px 20px; /* Adjust padding as needed */
+    }
+</style>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -28,20 +33,13 @@
         <div class="col-md-12">
             <ul class="nav nav-tabs nav-fill" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#standings" role="tab">
-                        Teams
-                    </a>
+                    <a class="nav-link active custom-tab-padding" data-toggle="tab" href="#standings" role="tab">Teams</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#user-standings" role="tab">
-                        Users
-                    </a>
+                    <a class="nav-link custom-tab-padding" data-toggle="tab" href="#user-standings" role="tab">Users</a>
                 </li>
-                <!-- New Awards Tab -->
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#awards" role="tab">
-                        Awards
-                    </a>
+                    <a class="nav-link custom-tab-padding" data-toggle="tab" href="#awards" role="tab">Awards</a>
                 </li>
             </ul>
         </div>
@@ -55,49 +53,23 @@
                     {% include "admin/scoreboard/standings.html" %}
                 </div>
                 {% if Configs.user_mode == UserModeTypes.TEAMS %}
-
                 <div class="tab-pane fade" id="user-standings" role="tabpanel">
                     {% include "admin/scoreboard/users.html" %}
                 </div>
-
-                <!-- Awards Tab Content -->
                 <div class="tab-pane fade" id="awards" role="tabpanel">
                     <h3 class="text-center m-5">Awards</h3>
-                    <!-- Nav Tabs for Awards -->
                     <ul class="nav nav-tabs" role="tablist">
-                        <!-- Top Scorer Tab -->
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#challenge-master" role="tab">
-                                Top Scorer
-                            </a>
-                        </li>
-                        <!-- First Blood Tab -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#first-blood" role="tab">
-                                First Blood Awards
-                            </a>
-                        </li>
-                        <!-- Other Tags -->
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#top-submitssion" role="tab">
-                                Top Submissions
-                            </a>
+                            <a class="nav-link" data-toggle="tab" href="#first-blood" role="tab">First Blood Awards</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#top-solves" role="tab">
-                                Top Solves Teams
-                            </a>
+                            <a class="nav-link" data-toggle="tab" href="#top-solves" role="tab">Top Solves Teams</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#top-solves-topic" role="tab">
-                                Top Teams Clears All Challenge in Topics
-                            </a>
+                            <a class="nav-link" data-toggle="tab" href="#top-solves-topic" role="tab">Top Teams Clears All Challenges</a>
                         </li>
-                        
                     </ul>
-                    <!-- Tab Content for Awards -->
                     <div class="tab-content">
-                        <!-- Challenge Master Tab -->
                         <div class="tab-pane fade show active" id="challenge-master" role="tabpanel">
                             <table class="table">
                                 <thead>
@@ -112,14 +84,12 @@
                                     <tr>
                                         <td>{{ challenge_master.challenge_name }}</td>
                                         <td>{{ challenge_master.team_name or challenge_master.user_name }}</td>
-                                        <td>{{ challenge_master.max_score}}</td>
+                                        <td>{{ challenge_master.max_score }}</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- First Blood Tab -->
                         <div class="tab-pane fade" id="first-blood" role="tabpanel">
                             <table class="table">
                                 <thead>
@@ -140,8 +110,6 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Other Tabs -->
                         <div class="tab-pane fade" id="top-submitssion" role="tabpanel">
                             {% include "admin/scoreboard/FastSubmission.html" %}
                         </div>
@@ -151,12 +119,8 @@
                         <div class="tab-pane fade" id="top-solves-topic" role="tabpanel">
                             {% include "admin/scoreboard/TopClear.html" %}
                         </div>
-                        <!-- <div class="tab-pane fade" id="last-submit" role="tabpanel">
-                            {% include "admin/scoreboard/LastSubmission.html" %}
-                        </div> -->
                     </div>
                 </div>
-
                 {% endif %}
             </div>
         </div>

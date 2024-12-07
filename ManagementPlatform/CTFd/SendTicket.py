@@ -8,6 +8,7 @@ from CTFd.models import Tickets, Tokens, Users, db
 from CTFd.plugins import bypass_csrf_protection
 from CTFd.StartChallenge import get_token_from_header
 from sqlalchemy.orm import aliased
+import datetime
 
 
 sendticket = Blueprint("sendticket", __name__)
@@ -48,6 +49,7 @@ def send_ticket_from_user():
         title=data['title'],
         type=data['type'],
         description=data['description'],
+        create_at= datetime.datetime.now()
     )
 
     tickets = Tickets.query.filter_by(author_id=new_ticket.author_id).all()
