@@ -102,11 +102,13 @@
                             </td>
                             <td class="text-center">{{ challenge.id }}</td>
                             {% if not is_jury() %}
-                            <a href="{{ url_for('admin.challenges_detail', challenge_id=challenge.id) }}">
-                                {{ challenge.name }}
-                            </a>
+                            <td class="text-center">
+                                <a href="{{ url_for('admin.challenges_detail', challenge_id=challenge.id) }}">
+                                    {{ challenge.name }}
+                                </a>
+                            </td>
                             {% else %}
-                            {{ challenge.name }}
+                            <td> {{ challenge.name }}</td>
                             {% endif %}
                             <td>{{ challenge.category }}</td>
                             <td class="text-center">{{ challenge.value }}</td>
