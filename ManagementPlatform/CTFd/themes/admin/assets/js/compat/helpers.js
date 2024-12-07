@@ -43,12 +43,13 @@ const files = {
             resolve();
           } else {
             console.error("Unexpected response status:", jqXHR.status);
-      
+            alert("Unexpected response status: " + jqXHR.status);
             reject(new Error("Unexpected response status: " + jqXHR.status));
           }
         },
         error: function (jqXHR, textStatus, errorThrown) {
           console.error("Error during file upload:", textStatus, errorThrown);
+          alert("Error during file upload: " + textStatus + " " + errorThrown);
           reject(new Error("File upload failed: " + jqXHR.statusText));
         },
       });
