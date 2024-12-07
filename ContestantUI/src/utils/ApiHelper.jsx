@@ -20,8 +20,10 @@ class ApiHelper {
       (error) => {
         if (error.response && error.response.status === 401) {
           window.location.href = "/login"; // Chuyển hướng đến trang đăng nhập
-        }else if(error.response && error.response.status===403){
-          window.location.href='/forbidden';
+        }
+        if (error.response.status === 403) {
+          console.error("Access denied: You do not have permission to perform this action.");
+          window.location.href = "/forbidden"; 
         }
         return Promise.reject(error);
       }
