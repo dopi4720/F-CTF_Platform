@@ -82,7 +82,7 @@ const ChallengeList = () => {
                                     {challenge.name}
                                 </h3>
                                 <p className="text-theme-color-neutral text-left">
-                                    <b>Limit Time:</b> {challenge.time_limit ? challenge.time_limit + " minutes" : "None"}
+                                    <b>Limit Time:</b> {challenge.time_limit > 0 ? challenge.time_limit + " minutes" : "UNLIMITED"}
                                 </p>
                                 <p className="text-theme-color-neutral text-left">
                                     <b>Max attempts:</b> {challenge.max_attempts}
