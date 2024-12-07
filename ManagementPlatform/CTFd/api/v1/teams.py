@@ -696,7 +696,7 @@ class TeamContestant(Resource):
                     {
                         "name": member.name,
                         "email": member.email,
-                        "score": member.score,
+                        "score": member.get_score(admin=True),
                     }
                     for member in users_member
                 ]
@@ -704,9 +704,9 @@ class TeamContestant(Resource):
                 total_score = sum([challenge.value for challenge in challenges])
                 response = {
                     "name": team.name,
-                    "place": team.place,
+                    "place": team.get_place(admin=True),
                     "members": members,
-                    "score": team.score,
+                    "score": team.get_score(admin=True),
                     "challengeTotalScore": total_score,
                 }
                 return {"success": True, "data": response}

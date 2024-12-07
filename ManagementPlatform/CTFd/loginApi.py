@@ -13,6 +13,8 @@ from CTFd.utils import get_config, validators
 from CTFd.utils.decorators.modes import require_team_mode
 from CTFd.api.v1.users import authenticate_user
 from CTFd.utils.decorators import ratelimit
+from CTFd.constants.config import ConfigTypes, RegistrationVisibilityTypes
+from CTFd.utils.dates import ctftime, ctf_ended
 LoginUser = Blueprint("login", __name__)
 
 
@@ -104,6 +106,10 @@ def validate_email(email, email_regex):
 @bypass_csrf_protection
 def register():
     try:
+        register_config= get_config(ConfigTypes.REGISTRATION_VISIBILITY)
+        if(register_config== RegistrationVisibilityTypes.PRIVATE):
+            return jsonify({"success": False, "message": "You are not allowed to register at this time."}), 400
+        
         data = request.form.to_dict()
         username = data.get("username")
         email = data.get("email")
@@ -209,6 +215,10 @@ def register():
 @require_team_mode
 def create_team():
     errors = []
+    if(ctftime()):
+            return jsonify({'success':False, 'message': 'You are not allowed to join a team at this time'}), 400
+    if(ctf_ended):
+            return jsonify({'success':False, 'message': 'You are not allowed to join a team at this time'}), 400
     data = request.form.to_dict() or request.get_json()
     user = authenticate_user()
     
@@ -318,6 +328,11 @@ def create_team():
 @ratelimit(method="POST", limit=10, interval=5)
 def joinTeam():
     try:
+        if(ctftime()):
+            return jsonify({'success':False, 'message': 'You are not allowed to join a team at this time'}), 400
+        if(ctf_ended):
+            return jsonify({'success':False, 'message': 'You are not allowed to create a team at this time'}), 400
+
         data = request.form.to_dict() or request.get_json()
         user = authenticate_user()
         if not user:
