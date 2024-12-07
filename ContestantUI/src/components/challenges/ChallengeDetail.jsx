@@ -322,7 +322,7 @@ const ChallengeDetail = () => {
       if (data.time_limit !== -1) {
         setTimeLimit(data.time_limit * 60 || null);
         setTimeRemaining(detailsResponse.time_remaining);
-        if (detailsResponse.time_remaining > 0) {
+        if (detailsResponse.time_remaining > 0 ) {
           setUrl(detailsResponse.challenge_url || null);
           setIsChallengeStarted(detailsResponse.is_started || false);
           if (detailsResponse.is_started) {
@@ -335,8 +335,14 @@ const ChallengeDetail = () => {
         }
       } else {
         setTimeLimit(null);
-        setUrl(null);
-        setIsChallengeStarted(false);
+        if (detailsResponse.time_remaining == 0 ) {
+          setUrl(detailsResponse.challenge_url || null);
+          setIsChallengeStarted(detailsResponse.is_started || false);
+          if (detailsResponse.is_started) {
+            setUrl(detailsResponse.challenge_url || null)
+            setMessage(detailsResponse.message || "Challenge started by other member in your team. ")
+          }
+        } 
       }
       setFetchDetailSuccess(true);
       return detailsResponse.time_remaining;
