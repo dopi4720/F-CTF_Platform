@@ -83,26 +83,6 @@ def upload_file(challenge_id, file_path):
     else:
         return jsonify({"error": "File type not allowed. Only zip files are allowed."}), 400
 
-@file_app.route("/challenges/redeploy", methods=["POST"])
-@bypass_csrf_protection
-def re_deploy():
-    challenge_id = request.json.get("ChallengeId")
-    if not challenge_id:
-        return jsonify({"error": "Challenge ID is required"}), 400
-
-    deploy_histories = DeployedChallenge.query.filter_by(
-        challenge_id=challenge_id
-    ).all()
-    if not deploy_histories:
-        return (
-            jsonify(
-                {"error": "No deployment histories found for the provided Challenge ID"}
-            ),
-            404,
-        )
-    return redeploy(challenge_id)
-
-
 @file_app.route("/challenges/update-info-by-cs", methods=["POST"])
 @bypass_csrf_protection
 def update_challenge_info():

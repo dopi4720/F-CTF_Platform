@@ -13,17 +13,6 @@ import json
 from CTFd.utils.decorators import admin_or_jury
 from CTFd.utils.connector.multiservice_connector import estimate_server
 
-
-def create_secret_key(private_key: str, unix_time: int, data: dict) -> str:
-    sorted_keys = sorted(data.keys())
-    combine_string = str(unix_time) + private_key
-
-    for key in sorted_keys:
-        combine_string += str(data.get(key, "1"))
-
-    return hashlib.md5(combine_string.encode()).hexdigest()
-
-
 @admin.route("/admin/estimate", methods=["GET", "POST"])
 @admin_or_jury
 @bypass_csrf_protection
