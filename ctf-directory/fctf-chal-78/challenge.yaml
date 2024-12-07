@@ -1,0 +1,20 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "fctf-chal-78--1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "wsproblem"
+  template:
+    metadata:
+      labels:
+        app: "wsproblem"
+    spec:
+      containers:
+      - name: "web-base"
+        image: "kind/challenge/web-base:98db7b5c37ac3b9175155af0e47feea4ca5d8a18d3910f26de0decadb961f838"
+        env: []
+        ports:
+        - containerPort: 80

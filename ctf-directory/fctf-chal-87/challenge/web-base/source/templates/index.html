@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search Inside Yourself</title>
+<link rel="stylesheet" type="text/css" href="../static/css/styles.css"> <!-- Link to the CSS file -->
+</head>
+<body>
+
+<div class="header">
+    <p class="quote">The wisdom of the inner-self, rooted in empathy, intuition, and spiritual understanding, offers a depth of insight and guidance that transcends the capabilities of artificial intelligence.</p>
+    <img src="../static/img/siy.png" alt="Image" class="medium-image">
+</div>
+
+<form id="queryForm" action="/" method="POST">
+    <label for="searchQuery">Ask me any question:</label>
+    <input type="text" id="searchQuery" name="search" placeholder="What is the meaning of life?" required>
+    <div class="advance-search">
+        <!-- Checkbox to override the 'advance' parameter to 'True' when checked -->
+        {% if checked %}
+            <input type="checkbox" id="advance" name="advance" value="True" checked>
+        {% else %}
+            <input type="checkbox" id="advance" name="advance" value="True">
+        {% endif %}
+        <label for="advance">Advanced Search? Let your inner-self find out how the most relevant question, then get answer of that question to you!</label>
+        <input type="hidden" name="advance" value="">
+    </div>
+    <button type="submit">Ask</button>
+</form>
+
+<div class="answer">
+    {% if answer %}
+        <p>Answer: {{ answer }}</p>
+        Lighten up your inner universe at <a href='/answer'>here</a>
+    {% endif %}
+</div>
+
+</body>
+</html>

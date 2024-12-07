@@ -1,0 +1,20 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "fctf-chal-83--1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "donottrust"
+  template:
+    metadata:
+      labels:
+        app: "donottrust"
+    spec:
+      containers:
+      - name: "web-base"
+        image: "kind/challenge/web-base:1c50aa9b585667c1921138ab62facf00024f1a9b573c99bfd8b07d4c201417ff"
+        env: []
+        ports:
+        - containerPort: 3000

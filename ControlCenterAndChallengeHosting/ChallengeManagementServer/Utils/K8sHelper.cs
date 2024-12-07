@@ -70,8 +70,11 @@ namespace ChallengeManagementServer.Utils
                 await Task.Delay(500);
                 TaskList.Add(Task.Run(async () =>
                 {
+                    await Console.Out.WriteLineAsync("Start build image...");
                     //Get target service and build iamge for it
                     string BuildOutput = await CmdHelper.ExecuteBashCommandAsync(ProjectPath, $"kctf chal build challenge/{container.Name}", true);
+
+                    await Console.Out.WriteLineAsync("Received Build Output: " + BuildOutput);
 
                     var ImageLink = Regex.Match(BuildOutput, "(?<=__FCTF-IMAGE-URL__).*?(?=__FCTF-IMAGE-URL__)").Value.Trim();
 
@@ -179,7 +182,7 @@ namespace ChallengeManagementServer.Utils
         /// <returns></returns>
         public async Task<string?> GetPodNameFromDeployment(int TeamId)
         {
-          //  System.Console.WriteLine("Start get pod Name");
+            //  System.Console.WriteLine("Start get pod Name");
             string DeploymentName = $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}-{TeamId}";
             string? PodName = await CmdHelper.ExecuteBashCommandAsync("", $"kubectl get pods -n default | grep {DeploymentName} | grep -v Terminating", true);
             PodName = Regex.Replace(PodName, @"\s+", " ").Split(' ')[0];
@@ -189,16 +192,16 @@ namespace ChallengeManagementServer.Utils
         public async Task<string> GetDeploymentLogsAsync(int TeamId)
         {
             string? PodName = await GetPodNameFromDeployment(TeamId);
-          //  System.Console.WriteLine($"Pod Name: {PodName}");
+            //  System.Console.WriteLine($"Pod Name: {PodName}");
             StringBuilder Logs = new StringBuilder();
-           // System.Console.WriteLine("Start Get Log Pods");
+            // System.Console.WriteLine("Start Get Log Pods");
             foreach (var service in DeploymentConfigs.Spec.Template.Spec.Containers)
             {
                 while (true)
                 {
                     try
                     {
-                    //    Console.WriteLine($"Start get log {service.Name}");
+                        //    Console.WriteLine($"Start get log {service.Name}");
                         Logs.AppendLine($"<p style=\"color:green\">================================ BEGIN {service.Name} LOGS ================================</p>");
                         Logs.AppendLine();
                         string ServicePath = $"/api/v1/namespaces/default/pods/{PodName}/log?container={service.Name}";
@@ -246,7 +249,7 @@ namespace ChallengeManagementServer.Utils
 
             //todo: need to check if pod is running
 
-           // await Console.Out.WriteLineAsync($"Pod Name: {PodName}");
+            // await Console.Out.WriteLineAsync($"Pod Name: {PodName}");
             //Port forward into FreePort
             _ = Task.Run(async () =>
             {
@@ -260,7 +263,7 @@ namespace ChallengeManagementServer.Utils
                 {
                     ConnectionString = $"localhost:{FreePort}";
                 }
-                else if(ChallengeType.Equals("pwn", StringComparison.CurrentCultureIgnoreCase))
+                else if (ChallengeType.Equals("pwn", StringComparison.CurrentCultureIgnoreCase))
                 {
                     ConnectionString = $"Host: 127.0.0.1 - Port: {FreePort}";
                 }
@@ -298,6 +301,10 @@ namespace ChallengeManagementServer.Utils
         public async Task StopChallengeAsync(int TeamId)
         {
             string DeploymentName = $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}-{TeamId}";
+
+            //Delete deployment
+            await CmdHelper.ExecuteBashCommandAsync("", $"kubectl delete deployment {DeploymentName}", true);
+
             var ConfigSettings = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(ProjectPath, "settings.json")));
             if (ConfigSettings == null)
             {
@@ -319,7 +326,9 @@ namespace ChallengeManagementServer.Utils
             var TargetDeployment = deploymentList.FirstOrDefault(x => x.TeamId == TeamId && x.ChallengeId == ChallengeId);
             if (TargetDeployment == null)
             {
-                throw new Exception("Lỗi không tìm thấy Deployment trong cache (Kiểm tra lại team id và Challange ID)");
+                await Console.Out.WriteLineAsync("TargetDeployment == null");
+                return;
+                //throw new Exception("Lỗi không tìm thấy Deployment trong cache (Kiểm tra lại team id và Challange ID)");
             }
 
             int TargetPort = TargetDeployment.DeploymentPort;
@@ -339,7 +348,7 @@ namespace ChallengeManagementServer.Utils
                 {
                     // Kill tiến trình
                     await CmdHelper.ExecuteBashCommandAsync("", $"kill -9 {pid}", false);
-                   // await Console.Out.WriteLineAsync($"Tiến trình PID {pid} đã bị dừng.");
+                    // await Console.Out.WriteLineAsync($"Tiến trình PID {pid} đã bị dừng.");
                 }
 
                 string SubDomain = TargetDeployment.DeploymentDomainName.Contains(" - ") ? "" : TargetDeployment.DeploymentDomainName;
@@ -356,14 +365,11 @@ namespace ChallengeManagementServer.Utils
 
                 // Kiểm tra cấu hình
                 await CmdHelper.ExecuteBashCommandAsync("", "sudo nginx -t", false);
-               // await Console.Out.WriteLineAsync("NGINX config test");
+                // await Console.Out.WriteLineAsync("NGINX config test");
 
                 //reload NGINX
                 await CmdHelper.ExecuteBashCommandAsync("", "sudo systemctl reload nginx", false);
                 //  await Console.Out.WriteLineAsync("NGINX reloaded");
-
-                //Delete deployment
-                await CmdHelper.ExecuteBashCommandAsync("", $"kubectl delete deployment {DeploymentName}", true);
 
                 //Delete rule
                 await CmdHelper.ExecuteBashCommandAsync("", $"sudo ufw delete allow {TargetPort}/tcp", false);
@@ -416,19 +422,19 @@ server {{
             {
                 // Tạo file cấu hình NGINX
                 File.WriteAllText(nginxConfigPath, nginxConfig);
-              //  await Console.Out.WriteLineAsync("NGINX config file created successfully.");
+                //  await Console.Out.WriteLineAsync("NGINX config file created successfully.");
 
                 // Tạo symbolic link
                 string output = await CmdHelper.ExecuteBashCommandAsync("", $"sudo ln -s /etc/nginx/sites-available/{SubDomain} /etc/nginx/sites-enabled/", false);
-               // await Console.Out.WriteLineAsync("NGINX symbolic link created");
+                // await Console.Out.WriteLineAsync("NGINX symbolic link created");
 
                 // Kiểm tra cấu hình
                 output = await CmdHelper.ExecuteBashCommandAsync("", "sudo nginx -t", false);
-               // await Console.Out.WriteLineAsync("NGINX config test");
+                // await Console.Out.WriteLineAsync("NGINX config test");
 
                 //reload NGINX
                 output = await CmdHelper.ExecuteBashCommandAsync("", "sudo systemctl reload nginx", false);
-              //  await Console.Out.WriteLineAsync("NGINX reloaded");
+                //  await Console.Out.WriteLineAsync("NGINX reloaded");
 
                 // Tự động cài đặt HTTPS
                 //output = await CmdHelper.ExecuteBashCommandAsync("", $"sudo certbot --nginx -d {SubDomain} --redirect --non-interactive --agree-tos --email your-email@example.com", false);
@@ -444,7 +450,7 @@ server {{
         {
             int FreePort = GetAvailablePort();
 
-           // await Console.Out.WriteLineAsync($"Start forward ssh - Free Port: {FreePort}");
+            // await Console.Out.WriteLineAsync($"Start forward ssh - Free Port: {FreePort}");
 
             _ = Task.Run(async () =>
                  {

@@ -1,0 +1,20 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "fctf-chal-84--1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "websecchallenge"
+  template:
+    metadata:
+      labels:
+        app: "websecchallenge"
+    spec:
+      containers:
+      - name: "web-base"
+        image: "kind/challenge/web-base:4a39ada8fcdc59b646ce2e2198605400df4387d2f61fc24db94cca7a058f7040"
+        env: []
+        ports:
+        - containerPort: 80

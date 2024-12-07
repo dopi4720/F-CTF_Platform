@@ -372,7 +372,7 @@
 									</a>
 								</td>
 								<td class="text-center">
-									<a href="{{ url_for(" admin.users_detail", user_id=solve.user_id) }}">
+									<a href="{{ url_for("admin.users_detail", user_id=solve.user_id) }}">
 										{{ solve.user.name }}
 									</a>
 								</td>
@@ -443,7 +443,7 @@
 									</a>
 								</td>
 								<td class="text-center">
-									<a href="{{ url_for(" admin.users_detail", user_id=fail.user_id) }}">
+									<a href="{{ url_for("admin.users_detail", user_id=fail.user_id) }}">
 										{{ fail.user.name }}
 									</a>
 								</td>
@@ -506,7 +506,7 @@
 								</td>
 								<td class="text-center chal" id="{{ award.id }}">{{ award.name }}</td>
 								<td class="text-center">
-									<a href="{{ url_for(" admin.users_detail", user_id=award.user_id) }}">
+									<a href="{{ url_for("admin.users_detail", user_id=award.user_id) }}">
 										{{ award.user.name }}
 									</a>
 								</td>

@@ -1,0 +1,20 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "fctf-chal-86--1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "file-exploit"
+  template:
+    metadata:
+      labels:
+        app: "file-exploit"
+    spec:
+      containers:
+      - name: "web-base"
+        image: "kind/challenge/web-base:f67a010abcd1a718d5a64500858199dfdec2a7890804257b444d28dabe10d4e7"
+        env: []
+        ports:
+        - containerPort: 80

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Knowledge Universe</title>
+<link rel="stylesheet" type="text/css" href="../static/css/answer.css"> <!-- Link to the CSS file -->
+</head>
+<body>
+<h1>Discover Your Inner Universe</h1>
+<blockquote>The universe inside yourself knows everything. Go deeper, and wisdom will come.</blockquote>
+
+<form action="/answer" method="post">
+    <label for="question">Question:</label><br>
+    <textarea id="question" name="question" required></textarea><br>
+
+    <label for="answer">Answer:</label><br>
+    <textarea id="answer" name="answer" required></textarea><br>
+
+    <input type="submit" value="Submit">
+</form>
+
+{% if update_message %}
+    <div class="{{ 'success' if update_status else 'failure' }}">
+        {{ update_message }}
+        Go <a href="/">back</a> to get answer for your question
+    </div>
+{% endif %}
+
+</body>
+</html>

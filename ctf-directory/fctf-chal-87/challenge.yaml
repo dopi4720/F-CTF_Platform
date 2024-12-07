@@ -1,0 +1,31 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "fctf-chal-87--1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "the_mindfullness_inside"
+  template:
+    metadata:
+      labels:
+        app: "the_mindfullness_inside"
+    spec:
+      containers:
+      - name: "web-base"
+        image: "kind/challenge/web-base:a104b97a69471c2753c9b84d832f3a044bef22ea789561a19d1566f7b146f3a5"
+        env: []
+        ports:
+        - containerPort: 8000
+      - name: "db-base"
+        image: "kind/challenge/db-base:809419e48edb6f052397359b1e8ff2abb4ef0c917a9531f56574ea85dbb7ea16"
+        env:
+        - name: "POSTGRES_DB"
+          value: "postgres"
+        - name: "POSTGRES_USER"
+          value: "postgres"
+        - name: "POSTGRES_PASSWORD"
+          value: "postgres"
+        ports:
+        - containerPort: 5432

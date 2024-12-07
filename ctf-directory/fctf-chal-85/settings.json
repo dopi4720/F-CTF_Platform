@@ -1,0 +1,4 @@
+{
+ "TargetPort":"8012",
+ "ChallengeType":"pwn"
+}

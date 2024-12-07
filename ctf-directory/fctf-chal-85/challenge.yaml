@@ -1,0 +1,20 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "fctf-chal-85--1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "pwn-challenge"
+  template:
+    metadata:
+      labels:
+        app: "pwn-challenge"
+    spec:
+      containers:
+      - name: "pwn-base"
+        image: "kind/challenge/pwn-base:c5421decbe9bda9e6d4d27401bc6e97d28a119bf690c7f0c5b76367708a3f337"
+        env: []
+        ports:
+        - containerPort: 8012

@@ -1,0 +1,84 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8; /* Warm light gray background */
+  }
+  
+  .register-container {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff; /* White background */
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px rgba(255, 165, 0, 0.5); /* Shining orange box shadow */
+  }
+  
+  h2 {
+    text-align: center;
+    color: #ff8500; /* Warm orange text */
+  }
+  
+  .form-field {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666; /* Medium gray text */
+  }
+  
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 5px;
+  }
+  
+  button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #ff8500; /* Warm orange button */
+    border: none;
+    border-radius: 5px;
+    color: #fff; /* White text */
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #ffa500; /* Brighter orange on hover */
+  }
+  
+  .login-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #666; /* Medium gray text */
+  }
+  
+  .login-link a {
+    color: #007bff; /* Blue link color */
+    text-decoration: none;
+  }
+  
+  .login-link a:hover {
+    text-decoration: underline;
+  }
+  
+  .success {
+    color: #008000; /* Dark green success message */
+    font-weight: bold; /* Make the success message bold */
+    text-align: center; /* Center the success message */
+    margin-top: 10px; /* Add some space above the success message */
+  }
+  
+  .failure {
+    color: #ff0000; /* Dark red failure message */
+    font-weight: bold; /* Make the failure message bold */
+    text-align: center; /* Center the failure message */
+    margin-top: 10px; /* Add some space above the failure message */
+    border: 1px solid #ff0000; /* Add a red border around the failure message */
+    padding: 5px; /* Add padding to the failure message */
+    border-radius: 5px; /* Add border radius to soften the edges */
+    background-color: rgba(255, 0, 0, 0.1); /* Light red background color for the failure message */
+  }

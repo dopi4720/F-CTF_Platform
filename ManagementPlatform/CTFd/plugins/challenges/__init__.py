@@ -1,4 +1,4 @@
-from flask import Blueprint, session
+from flask import Blueprint, jsonify, session
 
 from CTFd.models import (
     ChallengeFiles,
@@ -32,12 +32,13 @@ class BaseChallenge(object):
         :return:
         """
         data = request.form or request.get_json()
+        if int(data["time_limit"]) >= -1:
+            challenge = cls.challenge_model(**data)
 
-        challenge = cls.challenge_model(**data)
-
-        db.session.add(challenge)
-        db.session.commit()
-
+            db.session.add(challenge)
+            db.session.commit()
+        else:
+            return jsonify({"error": "Time limit must be greater than -1"}), 400
         return challenge
 
     @classmethod
