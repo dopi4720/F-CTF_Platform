@@ -92,49 +92,52 @@ namespace ChallengeManagementServer.Controllers
         {
             try
             {
-                await Console.Out.WriteLineAsync("Receive request delete challenge from control center");
-                K8sHelper k8SHelper = new K8sHelper(ChallengeId, _connectionMultiplexer);
-                RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
-
-                var deploymentList = await redisHelper.GetFromCacheAsync<List<DeploymentInfo>>(RedisConfigs.RedisChallengeDeploymentListKey);
-                deploymentList = deploymentList?.Where(c => c.ChallengeId == ChallengeId).ToList();
-                var tasks = new List<Task>();
-
-                if (deploymentList != null && deploymentList.Count > 0)
+                //Đưa toàn bộ xly vào task bởi vì không cần quan tâm kết quả của task
+                _ = Task.Run(async () =>
                 {
-                    _ = Task.Run(async () =>
-                   {
-                       await Task.Delay(3000);
+                    await Console.Out.WriteLineAsync("Receive request delete challenge from control center");
+                    K8sHelper k8SHelper = new K8sHelper(ChallengeId, _connectionMultiplexer);
+                    RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
 
-                       foreach (var deployment in deploymentList)
-                       {
-                           await StopChallengeAsync(ChallengeId, deployment.TeamId);
-                       }
+                    var deploymentList = await redisHelper.GetFromCacheAsync<List<DeploymentInfo>>(RedisConfigs.RedisChallengeDeploymentListKey);
+                    deploymentList = deploymentList?.Where(c => c.ChallengeId == ChallengeId).ToList();
 
-                       string extractionDistPath = Path.Combine(ChallengeManagePathConfigs.ChallengeBasePath, $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}");
-                       await k8SHelper.RemoveImageFromDiskAsync();
-                       if (Directory.Exists(extractionDistPath))
-                       {
-                           await CmdHelper.ExecuteBashCommandAsync("", $"chmod -R 777 \"{extractionDistPath}\"", false);
-                           Directory.Delete(extractionDistPath, true);
-                       }
-                   });
-                }
-                else
-                {
-                    _ = Task.Run(async () =>
+                    if (deploymentList != null && deploymentList.Count > 0)
                     {
-                        await StopChallengeAsync(ChallengeId, -1);
-                        string extractionDistPath = Path.Combine(ChallengeManagePathConfigs.ChallengeBasePath, $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}");
-                        await k8SHelper.RemoveImageFromDiskAsync();
-                        if (Directory.Exists(extractionDistPath))
+                        _ = Task.Run(async () =>
                         {
-                            await CmdHelper.ExecuteBashCommandAsync("", $"chmod -R 777 \"{extractionDistPath}\"", false);
-                            Directory.Delete(extractionDistPath, true);
-                        }
-                    });
-                }
+                            foreach (var deployment in deploymentList)
+                            {
+                                await StopChallengeAsync(ChallengeId, deployment.TeamId);
+                            }
 
+                            string ChallengeFolderPath = Path.Combine(ChallengeManagePathConfigs.ChallengeBasePath, $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}");
+                            if (Directory.Exists(ChallengeFolderPath))
+                            {
+                                await CmdHelper.ExecuteBashCommandAsync("", $"chmod -R 777 \"{ChallengeFolderPath}\"", false);
+                                Directory.Delete(ChallengeFolderPath, true);
+                            }
+                            await k8SHelper.RemoveImageFromDiskAsync();
+                        });
+                    }
+                    else
+                    {
+                        _ = Task.Run(async () =>
+                        {
+                            await StopChallengeAsync(ChallengeId, -1);
+                            string extractionDistPath = Path.Combine(ChallengeManagePathConfigs.ChallengeBasePath, $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}");
+                            await k8SHelper.RemoveImageFromDiskAsync();
+                            if (Directory.Exists(extractionDistPath))
+                            {
+                                await CmdHelper.ExecuteBashCommandAsync("", $"chmod -R 777 \"{extractionDistPath}\"", false);
+                                Directory.Delete(extractionDistPath, true);
+                            }
+                        });
+                    }
+                });
+
+                //Delay 1s để đảm bảo task chạy xong xuôi
+                await Task.Delay(1000);
                 return Ok(new GeneralView { IsSuccess = true, Message = $"Deleted Challenge {ChallengeId}" });
             }
             catch (Exception ex)
