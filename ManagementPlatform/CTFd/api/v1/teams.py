@@ -701,7 +701,10 @@ class TeamContestant(Resource):
                     for member in users_member
                 ]
                 challenges = Challenges.query.filter_by(state="visible").all()
-                total_score = sum([challenge.value for challenge in challenges])
+                
+                # Sửa lỗi: kiểm tra và thay thế None bằng 0 khi tính tổng
+                total_score = sum([challenge.value if challenge.value is not None else 0 for challenge in challenges])
+
                 response = {
                     "name": team.name,
                     "place": team.get_place(admin=True),

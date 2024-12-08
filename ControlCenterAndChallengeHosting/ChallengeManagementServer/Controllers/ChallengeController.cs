@@ -135,7 +135,7 @@ namespace ChallengeManagementServer.Controllers
                     });
                 }
 
-                return Ok(new GeneralView { IsSuccess = true, Message = $"Deleting Challenge {ChallengeId}" });
+                return Ok(new GeneralView { IsSuccess = true, Message = $"Deleted Challenge {ChallengeId}" });
             }
             catch (Exception ex)
             {

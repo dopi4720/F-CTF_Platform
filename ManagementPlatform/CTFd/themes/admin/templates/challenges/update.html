@@ -54,7 +54,7 @@
 				Specify the time limit for solving this challenge. Teams will earn points when they solve it.
 			</small>
 		</label>
-		<input type="number" class="form-control chal-time-limit" name="time_limit" value="{{ challenge.time_limit }}"
+		<input type="number" class="form-control chal-time-limit" min="-1" name="time_limit" value="{{ challenge.time_limit }}"
 			required>
 	</div>
 	{% endblock %}

@@ -297,6 +297,7 @@ def delete_challenge(challenge_id):
 
         response_data = response.json()
         if response_data.get("isSuccess"):
+            delete_cached_files(challenge_id)
             return {"isSuccess": True, "message": "Challenge deleted successfully"}, 200
         else:
             return {"isSuccess": False, "message": response_data.get("message")}, 400

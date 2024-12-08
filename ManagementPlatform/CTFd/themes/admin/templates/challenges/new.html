@@ -53,7 +53,7 @@
 
 					<div class="form-group">
 						<div class="form-group d-none upload-file">
-							<label>Files distributed along with your challenge:</label>
+							<label>Files template:</label>
 							<ul id="template-list">
 								{% for filename in template_files %}
 								<li class="list-unstyled">
@@ -69,7 +69,7 @@
 								Deploy Files:
 								<small class="form-text text-muted">Files distributed along with your challenge</small>
 							</label>
-							<input class="form-control-file" type="file" name="deploy_file">
+							<input class="form-control-file" type="file" accept=".zip" name="deploy_file">
 						</div>
 					</div>
 

@@ -29,8 +29,8 @@ Assets.css("assets/css/challenge-board.scss", theme="admin") }}
                 </div>
               </td>
               <th class="sort-col text-center"><b>ID</b></th>
-              <th class="sort-col"><b>Deploy state</b></th>
-              <th class="sort-col text-center"><b>Last Update</b></th>
+              <th class="sort-col text-center"><b>Deploy state</b></th>
+              <th class="sort-col text-center"><b>Deploy At</b></th>
               <th class=""></th>
             </tr>
           </thead>
@@ -51,7 +51,7 @@ Assets.css("assets/css/challenge-board.scss", theme="admin") }}
                 {{ deployed_challenge.challenge_id if deployed_challenge.challenge_id else 'N/A' }}
               </td>
 
-              <td>
+              <td class="text-center">
                 {{ deployed_challenge.deploy_status if deployed_challenge.deploy_status else 'N/A' }}
               </td>
               <td class="text-center">

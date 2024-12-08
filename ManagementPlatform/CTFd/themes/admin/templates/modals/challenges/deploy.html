@@ -1,5 +1,17 @@
 <form id="challenge-deploy" enctype="multipart/form-data">
   <div class="form-group">
+    <label>Files template:</label>
+							<ul id="template-list">
+								{% for filename in template_files %}
+								<li class="list-unstyled">
+									<a href="{{ url_for('admin.download_template', filename=filename) }}" download>
+										{{ filename }}
+									</a>
+								</li>
+								{% else %}
+								<li>No templates available.</li>
+								{% endfor %}
+							</ul>
     <label>
       Files:
       <small class="form-text text-muted">Files distributed along with your challenge</small>

@@ -81,12 +81,22 @@ class BaseChallenge(object):
         :return:
         """
         data = request.form or request.get_json()
-       
-        for attr, value in data.items():
-            setattr(challenge, attr, value)
 
-        db.session.commit()
+        # Kiểm tra nếu 'time_limit' có trong dữ liệu và kiểm tra giá trị của nó
+        if "time_limit" in data:
+            if int(data["time_limit"]) >= -1:
+                for attr, value in data.items():
+                    setattr(challenge, attr, value)
+                db.session.commit()
+            else:
+                return jsonify({"error": "Time limit must be greater than -1"}), 400
+        else:
+            for attr, value in data.items():
+                setattr(challenge, attr, value)
+            db.session.commit()
+
         return challenge
+
 
     @classmethod
     def delete(cls, challenge):

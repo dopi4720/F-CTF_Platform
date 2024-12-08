@@ -39,6 +39,7 @@ from CTFd.models import (
     Files,
     Solves,
     Submissions,
+    Teams,
     Tokens,
     Topics,
     Users,
@@ -105,9 +106,14 @@ def get_challenge_detail(challenge_id):
         if token is None:
             return jsonify({"error": "Token not found"}), 404
         user = Users.query.filter_by(id=token.user_id).first()
+        
         if user is None:
             return jsonify({"error": "User not found"}), 404
         team_id = user.team_id
+        team = Teams.query.filter_by(id = team_id).first()
+        if team.banned or user.banned:
+            return jsonify({"error": "Your team has been banned"}), 404
+
 
         solve_id = (
         Solves.query.with_entities(Solves.challenge_id)
@@ -172,7 +178,7 @@ def get_challenge_detail(challenge_id):
                 return (
                     jsonify(
                         {
-                            "message":f"challenge was started by: {user_name}",
+                            "message":f"Challenge was started by: {user_name}",
                             "data": challenge_data,
                             "is_started": True,
                             "challenge_url": challenge_data_cached["challenge_url"],

@@ -1,7 +1,7 @@
 apiVersion: "apps/v1"
 kind: "Deployment"
 metadata:
-  name: "fctf-chal-85--1"
+  name: "fctf-chal-99-50"
 spec:
   replicas: 1
   selector:
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: "pwn-base"
-        image: "kind/challenge/pwn-base:c5421decbe9bda9e6d4d27401bc6e97d28a119bf690c7f0c5b76367708a3f337"
+        image: "kind/challenge/pwn-base:7c2681500f221db71e538f3a15691349e7bdfc67d103bbb811840a42a2cf1442"
         env: []
         ports:
         - containerPort: 8012

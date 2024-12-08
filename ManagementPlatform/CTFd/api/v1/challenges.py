@@ -493,7 +493,7 @@ class Challenge(Resource):
         user_id = session["id"]
         user = Users.query.filter_by(id=user_id).first()
         challenge = Challenges.query.filter_by(id=challenge_id).first_or_404()
-
+        
         # Debugging logs
         print(f"Challenge user_id: {challenge.user_id}")
         print(f"Current user's user_id: {user_id}")
@@ -526,12 +526,15 @@ class Challenge(Resource):
 
         challenge = Challenges.query.filter_by(id=challenge_id).first_or_404()
         if challenge.require_deploy:
-            delete_response, status_code = delete_challenge(challenge_id)
-            if status_code != 200 or not delete_response.get("isSuccess"):
-                return {
-                    "isSuccess": False,
-                    "message": delete_response.get("message"),
-                }, status_code
+            if challenge.deploy_status != "PENDING_DEPLOY":
+                delete_response, status_code = delete_challenge(challenge_id)
+                if status_code != 200 or not delete_response.get("isSuccess"):
+                    return {
+                        "isSuccess": False,
+                        "message": delete_response.get("message"),
+                    }, status_code
+            else:
+                pass
 
         chal_class = get_chal_class(challenge.type)
         chal_class.delete(challenge)

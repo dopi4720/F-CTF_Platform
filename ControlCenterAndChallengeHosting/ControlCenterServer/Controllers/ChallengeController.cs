@@ -216,19 +216,22 @@ namespace ControlCenterServer.Controllers
 
                 if (redisGetDeployInfo == null || redisGetDeployInfo.LastDeployTime == null)
                 {
-                    return BadRequest(new GeneralView()
+                    return Ok(new GeneralView()
                     {
-                        Message = $"Challenge {challengeId} is not yet deployed, can't delete",
-                        IsSuccess = false
+                        Message = $"Deleted",
+                        IsSuccess = true
                     });
                 }
 
                 var challengeHostServer = ControlCenterServiceConfig.ChallengeServerInfoList.FirstOrDefault(c => c.ServerId == redisGetDeployInfo.ServerId);
-                if (challengeHostServer == null) return BadRequest(new GeneralView()
+                if (challengeHostServer == null) 
                 {
-                    Message = "ChallengeHostServer is null, check config machine id",
-                    IsSuccess = false
-                });
+                    return Ok(new GeneralView()
+                    {
+                        Message = $"Deleted",
+                        IsSuccess = true
+                    });
+                }
 
                 var deleteRequest = new RestRequest();
                 deleteRequest.Method = Method.Post;
@@ -301,11 +304,27 @@ namespace ControlCenterServer.Controllers
         [HttpPost("start")]
         public async Task<IActionResult> StartInstance([FromHeader] string SecretKey, [FromForm] StartChallengeInstanceRequest instanceInfo)
         {
+            var redisQueueCount = 0;
             await Console.Out.WriteLineAsync($"Received start request for challenge ID {instanceInfo.ChallengeId} - Team {instanceInfo.TeamId}");
-            try
-            {
                 // tao connection redis server 
                 RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
+                //Check neu queue > max instance thi bao loi
+                string RedisQueueDeployKey = $"{RedisConfigs.RedisQueueDeployKey}{instanceInfo.TeamId}";
+                
+            try
+            {
+                redisQueueCount = await redisHelper.GetFromCacheAsync<int>(RedisQueueDeployKey);
+                if (redisQueueCount >= ServiceConfigs.MaxInstanceAtTime)
+                {
+                    return BadRequest(new GeneralView()
+                    {
+                        Message = $"Too many start challenge request, please try again later",
+                        IsSuccess = false
+                    });
+                }
+                redisQueueCount++;
+                await redisHelper.SetCacheAsync(RedisQueueDeployKey,redisQueueCount, TimeSpan.MaxValue);
+
                 // set gia tri cho redis deploy key
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{instanceInfo.ChallengeId}";
                 // check key redis deploy ton tai hay khong, get value redis deploy key, 
@@ -348,11 +367,11 @@ namespace ControlCenterServer.Controllers
                             });
                         }
                     }
-
+                    await Console.Out.WriteLineAsync($"Start for {instanceInfo.TeamId} - instanceListByTeam.Count: "+ instanceListByTeam.Count);
                     List<int> challengeInstanceAreRunning = new List<int>();
                     if (instanceInfo.TeamId != -1 && instanceListByTeam != null && instanceListByTeam.Count >= ServiceConfigs.MaxInstanceAtTime)
                     {
-                        messageMaxInstanceAtTime += "\n Instances are running for:";
+                        messageMaxInstanceAtTime += "<br> The instances list are running:";
                         foreach (var instance in instanceListByTeam)
                         {
                             challengeInstanceAreRunning.Add(instance.ChallengeId);
@@ -414,7 +433,6 @@ namespace ControlCenterServer.Controllers
                 DeploymentInfo challengeInstance = startResult.data;
 
                 instanceList?.Add(challengeInstance);
-
                 await redisHelper.SetCacheAsync(redisInstanceKey, instanceList, TimeSpan.MaxValue);
 
                 //_ = Task.Run(async () =>
@@ -455,6 +473,10 @@ namespace ControlCenterServer.Controllers
                     Message = message,
                     IsSuccess = false
                 });
+            }
+            finally{
+                redisQueueCount--;
+                await redisHelper.SetCacheAsync(RedisQueueDeployKey,redisQueueCount, TimeSpan.MaxValue);
             }
         }
 

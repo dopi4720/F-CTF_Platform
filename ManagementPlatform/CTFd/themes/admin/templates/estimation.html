@@ -7,18 +7,6 @@
             <h1>Estimate</h1>
         </div>
     </div>
-    <nav class="mb-4">
-        <ul class="nav nav-pills justify-content-evenly">
-            <li class="nav-item">
-                <a class="nav-link active" href="#" id="performanceEstimateLink" onclick="showSection('performanceEstimate', this)" style="background-color: #034ea2; color: white;">Performance Estimate</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" id="excelReaderLink" onclick="showSection('excelReader', this)" style="background-color: #034ea2; color: white;">Estimate server plan
-                </a>
-            </li>
-        </ul>
-    </nav>
-
     <div id="performanceEstimate" class="mt-4">
         <div class="card">
            
@@ -54,120 +42,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Resource Calculation -->
-    <div id="excelReader" style="display: none;" class="mt-4">
-        <div class="card">
-            <div class="card-body">
-                <div class="mb-4">
-                    <label for="resourceTeamCount" class="form-label">Number of Teams:</label>
-                    <input type="number" id="resourceTeamCount" class="form-control mb-3" value="1" min="1" step="1">
-
-                    <label for="instanceCount" class="form-label">Number of Instances:</label>
-                    <input type="number" id="instanceCount" class="form-control mb-3" value="1" min="1" step="1">
-
-                    <label for="excelFile" class="form-label">Upload Excel File (Optional):</label>
-                    <input type="file" id="excelFile" class="form-control mb-3" accept=".xlsx, .xls, .csv">
-
-                    <button type="button" class="btn btn-primary w-100" onclick="calculateResources()">Calculate Resources</button>
-                </div>
-
-                <table id="resultTable" class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Technology</th>
-                            <th>Min CPU</th>
-                            <th>Min RAM</th>
-                            <th>Recommended CPU</th>
-                            <th>Recommended RAM</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Results will be populated here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
 
-<script>
-    let techData = [
-        { name: "Node.js", minRAM: 256, minCPU: 0.2, recommendedRAM: 512, recommendedCPU: 1 },
-        { name: "Spring Boot", minRAM: 512, minCPU: 0.5, recommendedRAM: 2048, recommendedCPU: 2 },
-        { name: "ASP.NET Core", minRAM: 512, minCPU: 0.5, recommendedRAM: 2048, recommendedCPU: 2 },
-        { name: "Django", minRAM: 256, minCPU: 0.2, recommendedRAM: 512, recommendedCPU: 1 },
-        { name: "Ruby on Rails", minRAM: 256, minCPU: 0.2, recommendedRAM: 512, recommendedCPU: 1 },
-        { name: "Laravel", minRAM: 256, minCPU: 0.2, recommendedRAM: 512, recommendedCPU: 1 },
-        { name: "Next.js", minRAM: 256, minCPU: 0.3, recommendedRAM: 1024, recommendedCPU: 1 },
-        { name: "Angular", minRAM: 256, minCPU: 0.2, recommendedRAM: 512, recommendedCPU: 1 },
-        { name: "React.js", minRAM: 256, minCPU: 0.2, recommendedRAM: 512, recommendedCPU: 1 },
-        { name: "Flask", minRAM: 128, minCPU: 0.1, recommendedRAM: 256, recommendedCPU: 1 }
-    ];
-
-    function calculateResources() {
-        let teamCount = parseFloat(document.getElementById('resourceTeamCount').value) || 1;
-        let instanceCount = parseFloat(document.getElementById('instanceCount').value) || 1;
-
-        const fileInput = document.getElementById('excelFile');
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = e.target.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
-                const sheetName = workbook.SheetNames[0];
-                const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-
-                const formattedData = jsonData.slice(1).map(row => ({
-                    name: row[0],
-                    minCPU: row[1],
-                    recommendedCPU: row[2],
-                    minRAM: row[3],
-                    recommendedRAM: row[4],
-                }));
-
-                processCalculation(teamCount, instanceCount, formattedData);
-            };
-            reader.readAsBinaryString(file);
-        } else {
-            processCalculation(teamCount, instanceCount, techData);
-        }
-    }
-
-    function processCalculation(teamCount, instanceCount, data) {
-        const tbody = document.querySelector('#resultTable tbody');
-        tbody.innerHTML = ''; // Clear previous results
-
-        data.forEach(tech => {
-            const totalRAMMin = tech.minRAM * teamCount * instanceCount;
-            const totalCPUMin = tech.minCPU * teamCount * instanceCount;
-            const totalRAMRecommended = tech.recommendedRAM * teamCount * instanceCount;
-            const totalCPURecommended = tech.recommendedCPU * teamCount * instanceCount;
-
-            const row = `
-                <tr>
-                    <td>${tech.name}</td>
-                    <td>${totalCPUMin.toFixed(2)} cores</td>
-                    <td>${totalRAMMin} MB</td>
-                    <td>${totalCPURecommended.toFixed(2)} cores</td>
-                    <td>${totalRAMRecommended} MB</td>
-                </tr>`;
-            tbody.innerHTML += row;
-        });
-    }
-
-    function showSection(sectionId, link) {
-        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-        link.classList.add('active');
-
-        document.getElementById('performanceEstimate').style.display = 'none';
-        document.getElementById('excelReader').style.display = 'none';
-        document.getElementById(sectionId).style.display = 'block';
-    }
-    processCalculation(1, 1, techData);
-    showSection('performanceEstimate', document.getElementById('performanceEstimateLink'));
-</script>
 {% endblock %}

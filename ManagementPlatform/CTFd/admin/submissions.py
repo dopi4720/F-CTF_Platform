@@ -5,6 +5,8 @@ from CTFd.models import Challenges, Submissions
 from CTFd.utils.decorators import admin_or_jury, admins_only
 from CTFd.utils.helpers.models import build_model_filters
 from CTFd.utils.modes import get_model
+from pytz import timezone
+import pytz
 
 
 @admin.route("/admin/submissions", defaults={"submission_type": None})
