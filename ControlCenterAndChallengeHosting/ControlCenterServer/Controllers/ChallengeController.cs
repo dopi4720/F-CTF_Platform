@@ -473,10 +473,10 @@ namespace ControlCenterServer.Controllers
                 {
                     ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 }
+                redisQueueCount--;
             }
             finally
             {
-                redisQueueCount--;
                 await redisHelper.SetCacheAsync(RedisQueueDeployKey, redisQueueCount, TimeSpan.MaxValue);
             }
 
@@ -490,11 +490,20 @@ namespace ControlCenterServer.Controllers
         [HttpPost("stop")]
         public async Task<IActionResult> StopInstance([FromHeader] string SecretKey, [FromForm] StopChallengeInstanceRequest stopInstanceRequest)
         {
+            int redisQueueCount = 0;
+            // tao connection redis server 
+            RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
+            string ErrorMessage = "Error while stopping, please try again in some seconds.";
+            //Xóa bớt hàng chờ deploy (Cái này phục vụ mục đích nếu bấm start quá nhanh sẽ không xly kịp)
+            string RedisQueueDeployKey = $"{RedisConfigs.RedisQueueDeployKey}{stopInstanceRequest.TeamId}";
             try
             {
-                // tao connection redis server 
-                RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
-                // set gia tri cho redis deploy key
+                redisQueueCount = await redisHelper.GetFromCacheAsync<int>(RedisQueueDeployKey);
+                if (redisQueueCount > 0)
+                {
+                    redisQueueCount--;
+                }
+
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{stopInstanceRequest.ChallengeId}";
                 // check key redis deploy ton tai hay khong, get value redis deploy key, 
                 var redisGetDeployInfo = await redisHelper.GetFromCacheAsync<DeploymentInfo>(redisDeployKey);
@@ -563,18 +572,23 @@ namespace ControlCenterServer.Controllers
             }
             catch (Exception ex)
             {
+                redisQueueCount++;
                 await Console.Out.WriteLineAsync("Error in Start Instance: " + ex.Message);
-                string message = "Tell admin to preview again and check challenge configs settings";
                 if (stopInstanceRequest.TeamId == -1)
                 {
-                    message = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                    ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 }
-                return BadRequest(new GeneralView
-                {
-                    Message = message,
-                    IsSuccess = false
-                });
             }
+            finally
+            {
+                await redisHelper.SetCacheAsync(RedisQueueDeployKey, redisQueueCount, TimeSpan.MaxValue);
+            }
+
+            return BadRequest(new GeneralView
+            {
+                Message = ErrorMessage,
+                IsSuccess = false
+            });
         }
     }
 }
