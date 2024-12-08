@@ -686,6 +686,10 @@ const ChallengeDetail = () => {
                                             {challenge.type === "multiple_choice" && (
                                                 <pre className="bg-white rounded-md whitespace-pre-wrap break-words font-sans">{challenge.type === "multiple_choice" ? <div ref={descriptionRef} dangerouslySetInnerHTML={{ __html: challenge.description }} /> : <div>{challenge.description}</div>}</pre>
                                             )}
+                                            {challenge.type !== "multiple_choice" && (
+                                                <pre className="bg-white rounded-md whitespace-pre-wrap break-words font-sans">{challenge.type === "multiple_choice" ? <div ref={descriptionRef} dangerouslySetInnerHTML={{ __html: challenge.description }} /> : <div>{challenge.description}</div>}</pre>
+                                            )}
+
                                             {challenge.files && (
                                                 <div>
                                                     <div className="flex flex-wrap gap-4">
