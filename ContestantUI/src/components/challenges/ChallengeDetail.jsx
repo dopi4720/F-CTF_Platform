@@ -435,7 +435,7 @@ const ChallengeDetail = () => {
             } else {
                 Swal.fire({
                     title: "Error!",
-                    text: `Failed to start the challenge.\n${response.message || response.error || "An error occurs, please try again later!"}`,
+                    text: `${response.message || response.error || "An error occurs, please try again later!"}`,
                     icon: "error",
                     confirmButtonText: "OK",
                 });
