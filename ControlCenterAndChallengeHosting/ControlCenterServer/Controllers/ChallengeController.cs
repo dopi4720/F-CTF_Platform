@@ -313,8 +313,6 @@ namespace ControlCenterServer.Controllers
 
             //Phục vụ việc trả về Bad Request
             string ErrorMessage = "Failed to start the challenge. An error occurred during initialization. Please wait a few moments and try again.";
-            object? ErrorData = null;
-            List<DeploymentInfo> instanceListByTeam = new();
 
             int ChallengeStartedCount = 0;
             try
@@ -365,7 +363,8 @@ namespace ControlCenterServer.Controllers
 
                 if (instanceList != null)
                 {
-                    instanceListByTeam = instanceList.Where(p => p.TeamId == instanceInfo.TeamId).ToList();
+                    var instanceListByTeam = instanceList?.Where(p => p.TeamId == instanceInfo.TeamId).ToList();
+                    string messageMaxInstanceAtTime = $"Each team can run only {ServiceConfigs.MaxInstanceAtTime} same time.";
 
                     if (instanceListByTeam != null && instanceListByTeam.Count > 0)
                     {
@@ -384,7 +383,23 @@ namespace ControlCenterServer.Controllers
                     List<int> challengeInstanceAreRunning = new List<int>();
                     if (instanceInfo.TeamId != -1 && instanceListByTeam != null && instanceListByTeam.Count >= ServiceConfigs.MaxInstanceAtTime)
                     {
-                        throw new Exception("Max instance reached");
+                        messageMaxInstanceAtTime += "<br> The instances list are running:";
+                        foreach (var instance in instanceListByTeam)
+                        {
+                            challengeInstanceAreRunning.Add(instance.ChallengeId);
+                        }
+                        await Console.Out.WriteLineAsync(JsonConvert.SerializeObject(new GenaralViewResponseData<List<int>>
+                        {
+                            Message = messageMaxInstanceAtTime,
+                            IsSuccess = false,
+                            data = challengeInstanceAreRunning
+                        }));
+                        return BadRequest(new GenaralViewResponseData<List<int>>
+                        {
+                            Message = messageMaxInstanceAtTime,
+                            IsSuccess = false,
+                            data = challengeInstanceAreRunning
+                        });
                     }
                 }
                 else
@@ -474,28 +489,6 @@ namespace ControlCenterServer.Controllers
                     ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 }
                 ChallengeStartedCount--;
-
-                if (ex.Message == "Max instance reached") 
-                {
-                    string messageMaxInstanceAtTime = $"Each team can run only {ServiceConfigs.MaxInstanceAtTime} same time.";
-                    List<int> challengeInstanceAreRunning = new List<int>();
-                    if (instanceInfo.TeamId != -1 && instanceListByTeam != null && instanceListByTeam.Count >= ServiceConfigs.MaxInstanceAtTime)
-                    {
-                        messageMaxInstanceAtTime += "<br> The instances list are running:";
-                        foreach (var instance in instanceListByTeam)
-                        {
-                            challengeInstanceAreRunning.Add(instance.ChallengeId);
-                        }
-                        await Console.Out.WriteLineAsync(JsonConvert.SerializeObject(new GenaralViewResponseData<List<int>>
-                        {
-                            Message = messageMaxInstanceAtTime,
-                            IsSuccess = false,
-                            data = challengeInstanceAreRunning
-                        }));
-                        ErrorMessage = messageMaxInstanceAtTime;
-                        ErrorData = challengeInstanceAreRunning;
-                    }
-                }
             }
 
             await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
@@ -508,8 +501,7 @@ namespace ControlCenterServer.Controllers
             return BadRequest(new GeneralView
             {
                 Message = ErrorMessage,
-                IsSuccess = false,
-                Data = ErrorData
+                IsSuccess = false
             });
         }
 
