@@ -21,6 +21,7 @@ namespace ControlCenterServer.Controllers
     [RequireSecretKey]
     public class ChallengeController : ControllerBase
     {
+        private static object _lock = new object();
         private static ConcurrentDictionary<int, int> TeamIDStartedChallengeCount = new ConcurrentDictionary<int, int>();
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         public ChallengeController(IConnectionMultiplexer connectionMultiplexer)
@@ -316,26 +317,24 @@ namespace ControlCenterServer.Controllers
             int ChallengeStartedCount = 0;
             try
             {
-                if (TeamIDStartedChallengeCount.ContainsKey(instanceInfo.TeamId))
+                lock (_lock)
                 {
-                    ChallengeStartedCount = TeamIDStartedChallengeCount[instanceInfo.TeamId];
-                }
-                else
-                {
-                    TeamIDStartedChallengeCount.TryAdd(instanceInfo.TeamId, ChallengeStartedCount);
-                }
-                await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
-
-                if (ChallengeStartedCount >= ServiceConfigs.MaxInstanceAtTime)
-                {
-                    return BadRequest(new GeneralView()
+                    if (TeamIDStartedChallengeCount.ContainsKey(instanceInfo.TeamId))
                     {
-                        Message = $"Too many start challenge request, please try again later",
-                        IsSuccess = false
-                    });
+                        ChallengeStartedCount = TeamIDStartedChallengeCount[instanceInfo.TeamId];
+                    }
+                    else
+                    {
+                        TeamIDStartedChallengeCount.TryAdd(instanceInfo.TeamId, ChallengeStartedCount);
+                    }
+
+                    if (ChallengeStartedCount >= ServiceConfigs.MaxInstanceAtTime)
+                    {
+                        throw new($"Too many start challenge request, please try again later");
+                    }
+                    ChallengeStartedCount++;
+                    TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
                 }
-                ChallengeStartedCount++;
-                TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
                 await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
 
                 // set gia tri cho redis deploy key
@@ -488,7 +487,12 @@ namespace ControlCenterServer.Controllers
             }
 
             await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
-            TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
+
+            lock (_lock)
+            {
+                TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
+            }
+
             return BadRequest(new GeneralView
             {
                 Message = ErrorMessage,
@@ -507,21 +511,23 @@ namespace ControlCenterServer.Controllers
 
             try
             {
-                if (TeamIDStartedChallengeCount.ContainsKey(stopInstanceRequest.TeamId))
+                lock (_lock)
                 {
-                    ChallengeStartedCount = TeamIDStartedChallengeCount[stopInstanceRequest.TeamId];
-                }
-                else
-                {
-                    TeamIDStartedChallengeCount.TryAdd(stopInstanceRequest.TeamId, ChallengeStartedCount);
-                }
-                await Console.Out.WriteLineAsync($"[STOP] ChallengeStartedCount: " + TeamIDStartedChallengeCount[stopInstanceRequest.TeamId]);
+                    if (TeamIDStartedChallengeCount.ContainsKey(stopInstanceRequest.TeamId))
+                    {
+                        ChallengeStartedCount = TeamIDStartedChallengeCount[stopInstanceRequest.TeamId];
+                    }
+                    else
+                    {
+                        TeamIDStartedChallengeCount.TryAdd(stopInstanceRequest.TeamId, ChallengeStartedCount);
+                    }
 
-                if (ChallengeStartedCount > 0)
-                {
-                    ChallengeStartedCount--;
+                    if (ChallengeStartedCount > 0)
+                    {
+                        ChallengeStartedCount--;
+                    }
+                    TeamIDStartedChallengeCount[ChallengeStartedCount] = stopInstanceRequest.TeamId;
                 }
-                TeamIDStartedChallengeCount[ChallengeStartedCount] = stopInstanceRequest.TeamId;
                 await Console.Out.WriteLineAsync($"[STOP] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[stopInstanceRequest.TeamId]);
 
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{stopInstanceRequest.ChallengeId}";
@@ -600,7 +606,10 @@ namespace ControlCenterServer.Controllers
                 }
             }
 
-            TeamIDStartedChallengeCount[ChallengeStartedCount] = stopInstanceRequest.TeamId;
+            lock (_lock)
+            {
+                TeamIDStartedChallengeCount[ChallengeStartedCount] = stopInstanceRequest.TeamId;
+            }
             await Console.Out.WriteLineAsync($"[STOP] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[stopInstanceRequest.TeamId]);
 
             return BadRequest(new GeneralView
