@@ -136,8 +136,8 @@ namespace ChallengeManagementServer.Controllers
                     }
                 });
 
-                //Delay 1s để đảm bảo task chạy xong xuôi
-                await Task.Delay(1000);
+                //Trick để mất warining thôi :v
+                await Task.Delay(0);
                 return Ok(new GeneralView { IsSuccess = true, Message = $"Deleted Challenge {ChallengeId}" });
             }
             catch (Exception ex)
