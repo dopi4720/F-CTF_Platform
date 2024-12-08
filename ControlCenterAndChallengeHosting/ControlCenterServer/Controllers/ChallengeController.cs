@@ -334,6 +334,8 @@ namespace ControlCenterServer.Controllers
                     });
                 }
                 ChallengeStartedCount++;
+                TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
+                await Console.Out.WriteLineAsync($"TeamIDStartedChallengeCount[instanceInfo.TeamId]: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
 
                 // set gia tri cho redis deploy key
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{instanceInfo.ChallengeId}";
