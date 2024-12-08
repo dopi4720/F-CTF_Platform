@@ -324,6 +324,7 @@ namespace ControlCenterServer.Controllers
                 {
                     TeamIDStartedChallengeCount.TryAdd(instanceInfo.TeamId, ChallengeStartedCount);
                 }
+                await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
 
                 if (ChallengeStartedCount >= ServiceConfigs.MaxInstanceAtTime)
                 {
@@ -335,7 +336,7 @@ namespace ControlCenterServer.Controllers
                 }
                 ChallengeStartedCount++;
                 TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
-                await Console.Out.WriteLineAsync($"TeamIDStartedChallengeCount[instanceInfo.TeamId]: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
+                await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
 
                 // set gia tri cho redis deploy key
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{instanceInfo.ChallengeId}";
@@ -486,7 +487,7 @@ namespace ControlCenterServer.Controllers
                 ChallengeStartedCount--;
             }
 
-            await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + ChallengeStartedCount);
+            await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
             TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
             return BadRequest(new GeneralView
             {
@@ -514,11 +515,14 @@ namespace ControlCenterServer.Controllers
                 {
                     TeamIDStartedChallengeCount.TryAdd(stopInstanceRequest.TeamId, ChallengeStartedCount);
                 }
+                await Console.Out.WriteLineAsync($"[STOP] ChallengeStartedCount: " + TeamIDStartedChallengeCount[stopInstanceRequest.TeamId]);
 
                 if (ChallengeStartedCount > 0)
                 {
                     ChallengeStartedCount--;
                 }
+                TeamIDStartedChallengeCount[ChallengeStartedCount] = stopInstanceRequest.TeamId;
+                await Console.Out.WriteLineAsync($"[STOP] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[stopInstanceRequest.TeamId]);
 
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{stopInstanceRequest.ChallengeId}";
                 // check key redis deploy ton tai hay khong, get value redis deploy key, 
@@ -596,8 +600,8 @@ namespace ControlCenterServer.Controllers
                 }
             }
 
-            await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + ChallengeStartedCount);
-            TeamIDStartedChallengeCount[stopInstanceRequest.TeamId] = ChallengeStartedCount;
+            TeamIDStartedChallengeCount[ChallengeStartedCount] = stopInstanceRequest.TeamId;
+            await Console.Out.WriteLineAsync($"[STOP] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[stopInstanceRequest.TeamId]);
 
             return BadRequest(new GeneralView
             {
