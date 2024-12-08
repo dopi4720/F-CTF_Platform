@@ -182,7 +182,7 @@ namespace ChallengeManagementServer.Utils
         /// <returns></returns>
         public async Task<string?> GetPodNameFromDeployment(int TeamId)
         {
-            //  System.Console.WriteLine("Start get pod Name");
+            //  System.await Console.Out.WriteLineAsync("Start get pod Name");
             string DeploymentName = $"{ChallengeManagePathConfigs.ChallengeRootName}-{ChallengeId}-{TeamId}";
             string? PodName = await CmdHelper.ExecuteBashCommandAsync("", $"kubectl get pods -n default | grep {DeploymentName} | grep -v Terminating", true);
             PodName = Regex.Replace(PodName, @"\s+", " ").Split(' ')[0];
@@ -192,16 +192,16 @@ namespace ChallengeManagementServer.Utils
         public async Task<string> GetDeploymentLogsAsync(int TeamId)
         {
             string? PodName = await GetPodNameFromDeployment(TeamId);
-            //  System.Console.WriteLine($"Pod Name: {PodName}");
+            //  System.await Console.Out.WriteLineAsync($"Pod Name: {PodName}");
             StringBuilder Logs = new StringBuilder();
-            // System.Console.WriteLine("Start Get Log Pods");
+            // System.await Console.Out.WriteLineAsync("Start Get Log Pods");
             foreach (var service in DeploymentConfigs.Spec.Template.Spec.Containers)
             {
                 while (true)
                 {
                     try
                     {
-                        //    Console.WriteLine($"Start get log {service.Name}");
+                        //    await Console.Out.WriteLineAsync($"Start get log {service.Name}");
                         Logs.AppendLine($"<p style=\"color:green\">================================ BEGIN {service.Name} LOGS ================================</p>");
                         Logs.AppendLine();
                         string ServicePath = $"/api/v1/namespaces/default/pods/{PodName}/log?container={service.Name}";

@@ -8,12 +8,13 @@ namespace ControlCenterServer
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            Console.WriteLine("Starting config");
+            await Console.Out.WriteLineAsync("Start Config server....");
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -24,6 +25,8 @@ namespace ControlCenterServer
 
             // Cấu hình Redis
             builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(RedisConfigs.ConnectionString));
+
+            await Console.Out.WriteLineAsync("Config server done, run application....");
 
             var app = builder.Build();
 
@@ -37,8 +40,6 @@ namespace ControlCenterServer
             app.UseAuthorization();
 
             app.MapControllers();
-
-            Console.WriteLine("Starting Receive Request");
 
             app.Run($"{ServiceConfigs.ServerHost}:{ServiceConfigs.ServerPort}");
             //app.Run();

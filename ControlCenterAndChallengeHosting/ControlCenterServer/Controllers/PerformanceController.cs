@@ -87,7 +87,7 @@ namespace ControlCenterServer.Controllers
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            await Console.Out.WriteLineAsync(ex.Message);
                         }
 
                     }));
@@ -194,7 +194,7 @@ namespace ControlCenterServer.Controllers
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            await Console.Out.WriteLineAsync(ex.Message);
                         }
                     }));
                 }

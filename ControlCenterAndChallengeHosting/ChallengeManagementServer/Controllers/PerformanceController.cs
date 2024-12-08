@@ -31,9 +31,9 @@ namespace ChallengeManagementServer.Controllers
         {
             try
             {
-                Console.WriteLine("Get request to get statistic");
+                await Console.Out.WriteLineAsync("Get request to get statistic");
                 var podStatisticList = await _performanceService.GetAllPodStatistic(_connectionMultiplexer);
-                Console.WriteLine("End request to get statistic");
+                await Console.Out.WriteLineAsync("End request to get statistic");
                 return Ok(new GenaralViewResponseData<List<PodStatisticInfo>>
                 {
                     IsSuccess = true,
@@ -56,9 +56,9 @@ namespace ChallengeManagementServer.Controllers
         {
             try
             {
-                Console.WriteLine("Get request to get statistic");
+                await Console.Out.WriteLineAsync("Get request to get statistic");
                 var clusterStatistic = await _performanceService.GetClusterCPUAndRAMUsage();
-                Console.WriteLine("End request to get statistic");
+                await Console.Out.WriteLineAsync("End request to get statistic");
                 return Ok(new GenaralViewResponseData<ClusterStatisticInfo>
                 {
                     IsSuccess = true,

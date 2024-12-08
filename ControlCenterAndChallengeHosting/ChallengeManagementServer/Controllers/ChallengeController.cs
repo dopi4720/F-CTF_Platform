@@ -40,13 +40,13 @@ namespace ChallengeManagementServer.Controllers
                 // Stop cac instance đang chạy và xóa cache
                 var deploymentList = await redisHelper.GetFromCacheAsync<List<DeploymentInfo>>(RedisConfigs.RedisChallengeDeploymentListKey);
                 deploymentList = deploymentList?.Where(c => c.ChallengeId == ChallengeId).ToList();
-                
+
                 if (deploymentList != null && deploymentList.Count > 0)
                 {
-                    Console.WriteLine("Co instance dang chay");
+                    await Console.Out.WriteLineAsync("Co instance dang chay");
                     foreach (var deployment in deploymentList)
                     {
-                        Console.WriteLine($"Check deploymentList {deployment.TeamId} - {deployment.ChallengeId}");
+                        await Console.Out.WriteLineAsync($"Check deploymentList {deployment.TeamId} - {deployment.ChallengeId}");
 
                         await StopChallengeAsync(ChallengeId, deployment.TeamId);
                         await Task.Delay(3000);
@@ -54,7 +54,7 @@ namespace ChallengeManagementServer.Controllers
                 }
 
                 // Deploy
-                Console.WriteLine("Starting Save File");
+                await Console.Out.WriteLineAsync("Starting Save File");
                 await _challengeService.SaveFileAsync(ChallengeId, file);
 
                 _ = Task.Run(async () =>
@@ -82,7 +82,7 @@ namespace ChallengeManagementServer.Controllers
             {
                 await Console.Out.WriteLineAsync("Error in Upload file: " + ex.Message);
                 await _challengeService.UpdateChallengeStatusToCTFd(ChallengeId, ex.Message, "DEPLOY_FAILED");
-                Console.WriteLine(ex.Message);
+                await Console.Out.WriteLineAsync(ex.Message);
                 return BadRequest(new GeneralView { Message = ex.Message, IsSuccess = false });
             }
         }
@@ -92,7 +92,7 @@ namespace ChallengeManagementServer.Controllers
         {
             try
             {
-                Console.WriteLine("Receive request delete challenge from control center");
+                await Console.Out.WriteLineAsync("Receive request delete challenge from control center");
                 K8sHelper k8SHelper = new K8sHelper(ChallengeId, _connectionMultiplexer);
                 RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
 
@@ -149,8 +149,8 @@ namespace ChallengeManagementServer.Controllers
         {
             try
             {
-                Console.WriteLine($"Get Request Start Challenge for team {instance.TeamId}");
-                Console.WriteLine($"Time limit {instance.TimeLimit}");
+                await Console.Out.WriteLineAsync($"Get Request Start Challenge for team {instance.TeamId}");
+                await Console.Out.WriteLineAsync($"Time limit {instance.TimeLimit}");
 
                 string teamName = instance.TeamId.ToString();
 
@@ -178,12 +178,12 @@ namespace ChallengeManagementServer.Controllers
                     //    await Task.Delay(TimeSpan.FromMinutes(instance.TimeLimit));
 
                     //    // Stop the challenge instance after the time limit
-                    //    Console.WriteLine($"Team {instance.TeamId} Het thoi gian thi cho challenge {instance.ChallengeId}");
+                    //    await Console.Out.WriteLineAsync($"Team {instance.TeamId} Het thoi gian thi cho challenge {instance.ChallengeId}");
 
                     //    await StopChallengeDeleteDeploymentAndCache(instance.ChallengeId, instance.TeamId);
                     //});
 
-                    //Console.WriteLine(endTime);
+                    //await Console.Out.WriteLineAsync(endTime);
                 }
 
                 return Ok(new GenaralViewResponseData<DeploymentInfo>
@@ -261,7 +261,7 @@ namespace ChallengeManagementServer.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception when stop and delete deployment " + ex.Message);
+                await Console.Out.WriteLineAsync("Exception when stop and delete deployment " + ex.Message);
                 throw;
             }
         }

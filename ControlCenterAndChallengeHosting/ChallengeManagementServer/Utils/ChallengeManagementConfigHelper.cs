@@ -55,7 +55,7 @@ namespace ChallengeManagementServer.Configs
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                await Console.Out.WriteLineAsync(ex.Message);
                 throw;
             }
         }

@@ -66,13 +66,13 @@ namespace ChallengeManagementServer.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    await Console.Out.WriteLineAsync(ex.Message);
                     throw;
                 }
             }
             catch (Exception ex)
             {
-                //Console.WriteLine(ex.Message+ " (line67)");
+                //await Console.Out.WriteLineAsync(ex.Message+ " (line67)");
                 string DeployLogs = await k8s.GetDeploymentLogsAsync(TeamId);
                 throw new Exception(ex.Message + $"\n\n{DeployLogs}");
             }
@@ -180,7 +180,7 @@ namespace ChallengeManagementServer.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                await Console.Out.WriteLineAsync(ex.Message);
                 throw;
             }
         }

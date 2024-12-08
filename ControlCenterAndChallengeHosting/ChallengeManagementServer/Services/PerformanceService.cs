@@ -90,7 +90,7 @@ namespace ChallengeManagementServer.Services
             }
             catch (IOException ex)
             {
-                Console.WriteLine(ex.Message);
+                await Console.Out.WriteLineAsync(ex.Message);
                 throw;
             }
         }
@@ -142,7 +142,7 @@ namespace ChallengeManagementServer.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                await Console.Out.WriteLineAsync(ex.Message);
                 throw;
             }
 
@@ -204,7 +204,7 @@ namespace ChallengeManagementServer.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                await Console.Out.WriteLineAsync(ex.Message);
                 return null;
             }
         }
@@ -233,7 +233,7 @@ namespace ChallengeManagementServer.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                await Console.Out.WriteLineAsync(ex.Message);
                 throw;
             }
         }
@@ -305,7 +305,7 @@ namespace ChallengeManagementServer.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                await Console.Out.WriteLineAsync(ex.Message);
                 throw;
             }
         }

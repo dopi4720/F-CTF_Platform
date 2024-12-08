@@ -160,8 +160,8 @@ namespace ControlCenterServer.Controllers
 
                 GeneralView? deployResult
                   = await multiServiceDeployConnector.ExecuteRequest<GeneralView>(deployrequest, requestDeployDictionary, RequestContentType.Form);
-                
-                Console.WriteLine(deployResult);
+
+                await Console.Out.WriteLineAsync(JsonConvert.SerializeObject(deployResult, new JsonSerializerSettings() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore }));
 
                 DeploymentInfo deploymentInfo = new DeploymentInfo()
                 {
@@ -224,7 +224,7 @@ namespace ControlCenterServer.Controllers
                 }
 
                 var challengeHostServer = ControlCenterServiceConfig.ChallengeServerInfoList.FirstOrDefault(c => c.ServerId == redisGetDeployInfo.ServerId);
-                if (challengeHostServer == null) 
+                if (challengeHostServer == null)
                 {
                     return Ok(new GeneralView()
                     {
@@ -286,7 +286,7 @@ namespace ControlCenterServer.Controllers
                     await redisHelper.SetCacheAsync(redisInstanceKey, instanceList, TimeSpan.MaxValue);
                 }
 
-                 await redisHelper.RemoveCacheAsync(redisDeployKey);
+                await redisHelper.RemoveCacheAsync(redisDeployKey);
 
                 return Ok(deleteResult);
             }
@@ -306,11 +306,14 @@ namespace ControlCenterServer.Controllers
         {
             var redisQueueCount = 0;
             await Console.Out.WriteLineAsync($"Received start request for challenge ID {instanceInfo.ChallengeId} - Team {instanceInfo.TeamId}");
-                // tao connection redis server 
-                RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
-                //Check neu queue > max instance thi bao loi
-                string RedisQueueDeployKey = $"{RedisConfigs.RedisQueueDeployKey}{instanceInfo.TeamId}";
-                
+            // tao connection redis server 
+            RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
+            //Check hàng chờ, số hàng chờ trùng với số Max Instance At Time của 1 team
+            string RedisQueueDeployKey = $"{RedisConfigs.RedisQueueDeployKey}{instanceInfo.TeamId}";
+
+            //Phục vụ việc trả về Bad Request
+            string ErrorMessage = "Error while starting challange, please try again in some seconds";
+
             try
             {
                 redisQueueCount = await redisHelper.GetFromCacheAsync<int>(RedisQueueDeployKey);
@@ -323,7 +326,7 @@ namespace ControlCenterServer.Controllers
                     });
                 }
                 redisQueueCount++;
-                await redisHelper.SetCacheAsync(RedisQueueDeployKey,redisQueueCount, TimeSpan.MaxValue);
+                await redisHelper.SetCacheAsync(RedisQueueDeployKey, redisQueueCount, TimeSpan.MaxValue);
 
                 // set gia tri cho redis deploy key
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{instanceInfo.ChallengeId}";
@@ -367,7 +370,7 @@ namespace ControlCenterServer.Controllers
                             });
                         }
                     }
-                    await Console.Out.WriteLineAsync($"Start for {instanceInfo.TeamId} - instanceListByTeam.Count: "+ instanceListByTeam.Count);
+                    await Console.Out.WriteLineAsync($"Start for {instanceInfo.TeamId} - instanceListByTeam.Count: " + instanceListByTeam.Count);
                     List<int> challengeInstanceAreRunning = new List<int>();
                     if (instanceInfo.TeamId != -1 && instanceListByTeam != null && instanceListByTeam.Count >= ServiceConfigs.MaxInstanceAtTime)
                     {
@@ -389,6 +392,7 @@ namespace ControlCenterServer.Controllers
                     instanceList = new List<DeploymentInfo>();
                 }
 
+                #region Call to Challenge Hosting Platform to deploy to k8s
                 var startRequest = new RestRequest();
                 startRequest.Method = Method.Post;
                 startRequest.Resource = "api/challenge/start";
@@ -428,13 +432,14 @@ namespace ControlCenterServer.Controllers
                 {
                     return BadRequest(startResult);
                 }
-
+                #endregion
 
                 DeploymentInfo challengeInstance = startResult.data;
 
                 instanceList?.Add(challengeInstance);
                 await redisHelper.SetCacheAsync(redisInstanceKey, instanceList, TimeSpan.MaxValue);
 
+                #region Commented Code
                 //_ = Task.Run(async () =>
                 //{
                 //    if (challengeInstance.EndTime != null)
@@ -451,6 +456,7 @@ namespace ControlCenterServer.Controllers
                 //        }
                 //    }
                 //});
+                #endregion
 
                 return Ok(new GenaralViewResponseData<string>
                 {
@@ -463,21 +469,22 @@ namespace ControlCenterServer.Controllers
             catch (Exception ex)
             {
                 await Console.Out.WriteLineAsync("Error in Start Instance: " + ex.Message);
-                string message = "Tell admin to preview again and check challenge configs settings";
                 if (instanceInfo.TeamId == -1)
                 {
-                    message = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                    ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 }
-                return BadRequest(new GeneralView
-                {
-                    Message = message,
-                    IsSuccess = false
-                });
             }
-            finally{
+            finally
+            {
                 redisQueueCount--;
-                await redisHelper.SetCacheAsync(RedisQueueDeployKey,redisQueueCount, TimeSpan.MaxValue);
+                await redisHelper.SetCacheAsync(RedisQueueDeployKey, redisQueueCount, TimeSpan.MaxValue);
             }
+
+            return BadRequest(new GeneralView
+            {
+                Message = ErrorMessage,
+                IsSuccess = false
+            });
         }
 
         [HttpPost("stop")]
