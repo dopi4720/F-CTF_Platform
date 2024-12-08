@@ -69,7 +69,7 @@ const ChallengeList = () => {
             <div className="text-center mb-4 text-theme-color-neutral-dark">
                 {statusMessage}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 justify-items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 justify-items-center">
                 {challenges.map((challenge) => (
                     isContestActive ? (
                         <Link
@@ -85,7 +85,7 @@ const ChallengeList = () => {
                                     <b>Limit Time:</b> {challenge.time_limit > 0 ? challenge.time_limit + " minutes" : "UNLIMITED"}
                                 </p>
                                 <p className="text-theme-color-neutral text-left">
-                                    <b>Max attempts:</b> {challenge.max_attempts}
+                                    <b>Max attempts:</b> {challenge.max_attempts == 0? "UNLIMITED" : challenge.max_attempts}
                                 </p>
                                 <p className="text-theme-color-neutral text-left">
                                     <b>Points:</b> {challenge.value}

@@ -98,13 +98,13 @@ const TicketList = () => {
         fetchTickets();
       } else {
         // Handle different error cases
-        const message = response.message || response.error || "An error occurred.";
+        const message = response.message || response.error || "Failed to send the ticket. Please try again.";
         setError(message);
 
       }
     } catch (err) {
       console.error("Error occurred:", err);
-      setError("Failed to send the ticket. Please try again.");
+      setError(err.response.data.message || "Failed to send the ticket. Please try again.");
     }
   };
 
