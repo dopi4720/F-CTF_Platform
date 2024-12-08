@@ -317,6 +317,7 @@ namespace ControlCenterServer.Controllers
             try
             {
                 redisQueueCount = await redisHelper.GetFromCacheAsync<int>(RedisQueueDeployKey);
+                await Console.Out.WriteLineAsync("redisQueueCount: " + redisQueueCount);
                 if (redisQueueCount >= ServiceConfigs.MaxInstanceAtTime)
                 {
                     return BadRequest(new GeneralView()
@@ -458,6 +459,7 @@ namespace ControlCenterServer.Controllers
                 //});
                 #endregion
 
+                await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + redisQueueCount);
                 return Ok(new GenaralViewResponseData<string>
                 {
                     Message = $"Start success challenge {instanceInfo.ChallengeId} for team {instanceInfo.TeamId}",
@@ -480,6 +482,7 @@ namespace ControlCenterServer.Controllers
                 await redisHelper.SetCacheAsync(RedisQueueDeployKey, redisQueueCount, TimeSpan.MaxValue);
             }
 
+            await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + redisQueueCount);
             return BadRequest(new GeneralView
             {
                 Message = ErrorMessage,
