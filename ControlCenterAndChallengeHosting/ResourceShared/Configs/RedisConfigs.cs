@@ -12,6 +12,6 @@ namespace ResourceShared.Configs
         public static string RedisChallengeTestKey = "CS_Deploy_Test_Challange_";
         public static string RedisDeployKey = "CS_Deploy_Chal_";
         public static string RedisChallengeDeploymentListKey = "CS_Challenge_Deployment_List";
-        public static string RedisChallengeInstanceListKey = "CS_Challenge_Instance_List";
+        public static string RedisStartedChallengeKey = "Started_Challenge";
     }
 }

@@ -105,6 +105,33 @@ namespace SocialSync.Shared.Utils
                     return false;
                 }
             }
+            public List<string> GetKeysByPattern(string pattern)
+            {
+                try
+                {
+                    var keys = new List<string>();
+                    var endpoints = _cache.Multiplexer.GetEndPoints();
+
+                    foreach (var endpoint in endpoints)
+                    {
+                        var server = _cache.Multiplexer.GetServer(endpoint);
+                        if (server.IsConnected)
+                        {
+                            // Sử dụng phương thức Keys để lấy các key theo pattern
+                            var foundKeys = server.Keys(pattern: pattern);
+                            keys.AddRange(foundKeys.Select(k => k.ToString()));
+                        }
+                    }
+
+                    return keys;
+                }
+                catch (Exception)
+                {
+                    // Nếu có lỗi, trả về danh sách rỗng
+                    return new List<string>();
+                }
+            }
+
         }
     }
 
