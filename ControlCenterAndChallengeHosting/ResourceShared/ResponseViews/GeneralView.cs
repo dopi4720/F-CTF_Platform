@@ -10,6 +10,7 @@ namespace ResourceShared.ResponseViews
     {
         public required string Message { get; set; }
         public bool IsSuccess { get; set; }
+        public object? Data { get; set; }
     }
 
     public class GenaralViewResponseData<T> : GeneralView

@@ -312,7 +312,9 @@ namespace ControlCenterServer.Controllers
             RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
 
             //Phục vụ việc trả về Bad Request
-            string ErrorMessage = "Error while starting challange, please try again in some seconds";
+            string ErrorMessage = "Failed to start the challenge. An error occurred during initialization. Please wait a few moments and try again.";
+            object? ErrorData = null;
+            List<DeploymentInfo> instanceListByTeam = new();
 
             int ChallengeStartedCount = 0;
             try
@@ -327,12 +329,12 @@ namespace ControlCenterServer.Controllers
                     {
                         TeamIDStartedChallengeCount.TryAdd(instanceInfo.TeamId, ChallengeStartedCount);
                     }
+                    ChallengeStartedCount++;
 
-                    if (ChallengeStartedCount >= ServiceConfigs.MaxInstanceAtTime)
+                    if (ChallengeStartedCount > ServiceConfigs.MaxInstanceAtTime)
                     {
                         throw new($"Too many start challenge request, please try again later");
                     }
-                    ChallengeStartedCount++;
                     TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
                 }
                 await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
@@ -363,8 +365,7 @@ namespace ControlCenterServer.Controllers
 
                 if (instanceList != null)
                 {
-                    var instanceListByTeam = instanceList?.Where(p => p.TeamId == instanceInfo.TeamId).ToList();
-                    string messageMaxInstanceAtTime = $"Each team can run only {ServiceConfigs.MaxInstanceAtTime} same time";
+                    instanceListByTeam = instanceList.Where(p => p.TeamId == instanceInfo.TeamId).ToList();
 
                     if (instanceListByTeam != null && instanceListByTeam.Count > 0)
                     {
@@ -379,21 +380,11 @@ namespace ControlCenterServer.Controllers
                             });
                         }
                     }
-                    await Console.Out.WriteLineAsync($"Start for {instanceInfo.TeamId} - instanceListByTeam.Count: " + instanceListByTeam.Count);
+
                     List<int> challengeInstanceAreRunning = new List<int>();
                     if (instanceInfo.TeamId != -1 && instanceListByTeam != null && instanceListByTeam.Count >= ServiceConfigs.MaxInstanceAtTime)
                     {
-                        messageMaxInstanceAtTime += "<br> The instances list are running:";
-                        foreach (var instance in instanceListByTeam)
-                        {
-                            challengeInstanceAreRunning.Add(instance.ChallengeId);
-                        }
-                        return BadRequest(new GenaralViewResponseData<List<int>>
-                        {
-                            Message = messageMaxInstanceAtTime,
-                            IsSuccess = false,
-                            data = challengeInstanceAreRunning
-                        });
+                        throw new Exception("Max instance reached");
                     }
                 }
                 else
@@ -433,9 +424,9 @@ namespace ControlCenterServer.Controllers
                 GenaralViewResponseData<DeploymentInfo>? startResult
                   = await connector.ExecuteRequest<GenaralViewResponseData<DeploymentInfo>>(startRequest, DictMultiService, RequestContentType.Form);
 
-                await Console.Out.WriteLineAsync($"Returned for challenge: {instanceInfo.ChallengeId}");
+                //await Console.Out.WriteLineAsync($"Returned for challenge: {instanceInfo.ChallengeId}");
 
-                await Console.Out.WriteLineAsync($"startResult: {JsonConvert.SerializeObject(startResult)}");
+                //await Console.Out.WriteLineAsync($"startResult: {JsonConvert.SerializeObject(startResult)}");
 
                 if (startResult == null || !startResult.IsSuccess || startResult.data == null)
                 {
@@ -467,7 +458,6 @@ namespace ControlCenterServer.Controllers
                 //});
                 #endregion
 
-                await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + ChallengeStartedCount);
                 return Ok(new GenaralViewResponseData<string>
                 {
                     Message = $"Start success challenge {instanceInfo.ChallengeId} for team {instanceInfo.TeamId}",
@@ -484,6 +474,28 @@ namespace ControlCenterServer.Controllers
                     ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 }
                 ChallengeStartedCount--;
+
+                if (ex.Message == "Max instance reached") 
+                {
+                    string messageMaxInstanceAtTime = $"Each team can run only {ServiceConfigs.MaxInstanceAtTime} same time.";
+                    List<int> challengeInstanceAreRunning = new List<int>();
+                    if (instanceInfo.TeamId != -1 && instanceListByTeam != null && instanceListByTeam.Count >= ServiceConfigs.MaxInstanceAtTime)
+                    {
+                        messageMaxInstanceAtTime += "<br> The instances list are running:";
+                        foreach (var instance in instanceListByTeam)
+                        {
+                            challengeInstanceAreRunning.Add(instance.ChallengeId);
+                        }
+                        await Console.Out.WriteLineAsync(JsonConvert.SerializeObject(new GenaralViewResponseData<List<int>>
+                        {
+                            Message = messageMaxInstanceAtTime,
+                            IsSuccess = false,
+                            data = challengeInstanceAreRunning
+                        }));
+                        ErrorMessage = messageMaxInstanceAtTime;
+                        ErrorData = challengeInstanceAreRunning;
+                    }
+                }
             }
 
             await Console.Out.WriteLineAsync($"[START] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[instanceInfo.TeamId]);
@@ -496,7 +508,8 @@ namespace ControlCenterServer.Controllers
             return BadRequest(new GeneralView
             {
                 Message = ErrorMessage,
-                IsSuccess = false
+                IsSuccess = false,
+                Data = ErrorData
             });
         }
 
@@ -505,7 +518,7 @@ namespace ControlCenterServer.Controllers
         {
             // tao connection redis server 
             RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
-            string ErrorMessage = "Error while stopping, please try again in some seconds.";
+            string ErrorMessage = "An error occurred while attempting to stop. Please wait a moment and try again.";
             //Xóa bớt hàng chờ deploy (Cái này phục vụ mục đích nếu bấm start quá nhanh sẽ không xly kịp)
             int ChallengeStartedCount = 0;
 
@@ -598,8 +611,7 @@ namespace ControlCenterServer.Controllers
             }
             catch (Exception ex)
             {
-                ChallengeStartedCount++;
-                await Console.Out.WriteLineAsync("Error in Start Instance: " + ex.Message);
+                await Console.Out.WriteLineAsync("Error in Stop Instance: " + ex.Message);
                 if (stopInstanceRequest.TeamId == -1)
                 {
                     ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
