@@ -526,7 +526,7 @@ namespace ControlCenterServer.Controllers
                     {
                         ChallengeStartedCount--;
                     }
-                    TeamIDStartedChallengeCount[ChallengeStartedCount] = stopInstanceRequest.TeamId;
+                    TeamIDStartedChallengeCount[stopInstanceRequest.TeamId] = ChallengeStartedCount;
                 }
                 await Console.Out.WriteLineAsync($"[STOP] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[stopInstanceRequest.TeamId]);
 
@@ -608,7 +608,7 @@ namespace ControlCenterServer.Controllers
 
             lock (_lock)
             {
-                TeamIDStartedChallengeCount[ChallengeStartedCount] = stopInstanceRequest.TeamId;
+                TeamIDStartedChallengeCount[stopInstanceRequest.TeamId] = ChallengeStartedCount;
             }
             await Console.Out.WriteLineAsync($"[STOP] ChallengeStartedCount updated to: " + TeamIDStartedChallengeCount[stopInstanceRequest.TeamId]);
 
