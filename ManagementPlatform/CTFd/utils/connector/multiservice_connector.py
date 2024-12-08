@@ -131,10 +131,12 @@ def challenge_start(payload, headers, api_start, challenge, challenge_time, cach
         else:
             message = res_data.get("message")
             if res_data.get("data"):
+                message += " Running challenge is:"
                 for item in res_data.get("data"):
                     challenges = Challenges.query.filter_by(id=item).first()
-                    challenge_name = challenges.name
-                    message += f"Challenge name: {challenge_name}. "
+                    if (challenges != None):
+                        challenge_name = challenges.name
+                    message += f" {challenge_name}, "
             return format_response({"message": message})
 
     except requests.exceptions.RequestException as e:
