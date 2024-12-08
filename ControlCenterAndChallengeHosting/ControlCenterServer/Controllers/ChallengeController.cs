@@ -12,6 +12,7 @@ using ResourceShared.Utils;
 using RestSharp;
 using SocialSync.Shared.Utils.ResourceShared.Utils;
 using StackExchange.Redis;
+using System.Collections.Concurrent;
 
 namespace ControlCenterServer.Controllers
 {
@@ -20,6 +21,7 @@ namespace ControlCenterServer.Controllers
     [RequireSecretKey]
     public class ChallengeController : ControllerBase
     {
+        private static ConcurrentDictionary<int, int> TeamIDStartedChallengeCount = new ConcurrentDictionary<int, int>();
         private readonly IConnectionMultiplexer _connectionMultiplexer;
         public ChallengeController(IConnectionMultiplexer connectionMultiplexer)
         {
@@ -304,21 +306,26 @@ namespace ControlCenterServer.Controllers
         [HttpPost("start")]
         public async Task<IActionResult> StartInstance([FromHeader] string SecretKey, [FromForm] StartChallengeInstanceRequest instanceInfo)
         {
-            var redisQueueCount = 0;
             await Console.Out.WriteLineAsync($"Received start request for challenge ID {instanceInfo.ChallengeId} - Team {instanceInfo.TeamId}");
             // tao connection redis server 
             RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
-            //Check hàng chờ, số hàng chờ trùng với số Max Instance At Time của 1 team
-            string RedisQueueDeployKey = $"{RedisConfigs.RedisQueueDeployKey}{instanceInfo.TeamId}";
 
             //Phục vụ việc trả về Bad Request
             string ErrorMessage = "Error while starting challange, please try again in some seconds";
 
+            int ChallengeStartedCount = 0;
             try
             {
-                redisQueueCount = await redisHelper.GetFromCacheAsync<int>(RedisQueueDeployKey);
-                await Console.Out.WriteLineAsync("redisQueueCount: " + redisQueueCount);
-                if (redisQueueCount >= ServiceConfigs.MaxInstanceAtTime)
+                if (TeamIDStartedChallengeCount.ContainsKey(instanceInfo.TeamId))
+                {
+                    ChallengeStartedCount = TeamIDStartedChallengeCount[instanceInfo.TeamId];
+                }
+                else
+                {
+                    TeamIDStartedChallengeCount.TryAdd(instanceInfo.TeamId, ChallengeStartedCount);
+                }
+
+                if (ChallengeStartedCount >= ServiceConfigs.MaxInstanceAtTime)
                 {
                     return BadRequest(new GeneralView()
                     {
@@ -326,8 +333,7 @@ namespace ControlCenterServer.Controllers
                         IsSuccess = false
                     });
                 }
-                redisQueueCount++;
-                await redisHelper.SetCacheAsync(RedisQueueDeployKey, redisQueueCount, TimeSpan.MaxValue);
+                ChallengeStartedCount++;
 
                 // set gia tri cho redis deploy key
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{instanceInfo.ChallengeId}";
@@ -459,7 +465,7 @@ namespace ControlCenterServer.Controllers
                 //});
                 #endregion
 
-                await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + redisQueueCount);
+                await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + ChallengeStartedCount);
                 return Ok(new GenaralViewResponseData<string>
                 {
                     Message = $"Start success challenge {instanceInfo.ChallengeId} for team {instanceInfo.TeamId}",
@@ -475,14 +481,11 @@ namespace ControlCenterServer.Controllers
                 {
                     ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 }
-                redisQueueCount--;
-            }
-            finally
-            {
-                await redisHelper.SetCacheAsync(RedisQueueDeployKey, redisQueueCount, TimeSpan.MaxValue);
+                ChallengeStartedCount--;
             }
 
-            await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + redisQueueCount);
+            await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + ChallengeStartedCount);
+            TeamIDStartedChallengeCount[instanceInfo.TeamId] = ChallengeStartedCount;
             return BadRequest(new GeneralView
             {
                 Message = ErrorMessage,
@@ -493,18 +496,26 @@ namespace ControlCenterServer.Controllers
         [HttpPost("stop")]
         public async Task<IActionResult> StopInstance([FromHeader] string SecretKey, [FromForm] StopChallengeInstanceRequest stopInstanceRequest)
         {
-            int redisQueueCount = 0;
             // tao connection redis server 
             RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
             string ErrorMessage = "Error while stopping, please try again in some seconds.";
             //Xóa bớt hàng chờ deploy (Cái này phục vụ mục đích nếu bấm start quá nhanh sẽ không xly kịp)
-            string RedisQueueDeployKey = $"{RedisConfigs.RedisQueueDeployKey}{stopInstanceRequest.TeamId}";
+            int ChallengeStartedCount = 0;
+
             try
             {
-                redisQueueCount = await redisHelper.GetFromCacheAsync<int>(RedisQueueDeployKey);
-                if (redisQueueCount > 0)
+                if (TeamIDStartedChallengeCount.ContainsKey(stopInstanceRequest.TeamId))
                 {
-                    redisQueueCount--;
+                    ChallengeStartedCount = TeamIDStartedChallengeCount[stopInstanceRequest.TeamId];
+                }
+                else
+                {
+                    TeamIDStartedChallengeCount.TryAdd(stopInstanceRequest.TeamId, ChallengeStartedCount);
+                }
+
+                if (ChallengeStartedCount > 0)
+                {
+                    ChallengeStartedCount--;
                 }
 
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{stopInstanceRequest.ChallengeId}";
@@ -575,17 +586,16 @@ namespace ControlCenterServer.Controllers
             }
             catch (Exception ex)
             {
-                redisQueueCount++;
+                ChallengeStartedCount++;
                 await Console.Out.WriteLineAsync("Error in Start Instance: " + ex.Message);
                 if (stopInstanceRequest.TeamId == -1)
                 {
                     ErrorMessage = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
                 }
             }
-            finally
-            {
-                await redisHelper.SetCacheAsync(RedisQueueDeployKey, redisQueueCount, TimeSpan.MaxValue);
-            }
+
+            await Console.Out.WriteLineAsync("Before return - redisQueueCount: " + ChallengeStartedCount);
+            TeamIDStartedChallengeCount[stopInstanceRequest.TeamId] = ChallengeStartedCount;
 
             return BadRequest(new GeneralView
             {
