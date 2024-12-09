@@ -304,37 +304,57 @@ namespace ControlCenterServer.Controllers
             await Console.Out.WriteLineAsync($"Received start request for challenge ID {instanceInfo.ChallengeId} - Team {instanceInfo.TeamId}");
             // tao connection redis server 
             RedisHelper redisHelper = new RedisHelper(_connectionMultiplexer);
+            int TeamId = instanceInfo.TeamId;
+            int ChallengeId = instanceInfo.ChallengeId;
+
+            #region Check cache xem đã có thông tin deployment info của challenge id + team id chưa, nếu có thì trả về luôn không gọi qua
+
+            string StartedCacheKey = $"{RedisConfigs.RedisStartedChallengeKey}_{ChallengeId}_{TeamId}";
+            DeploymentInfo? StartedChallengeInfo = await redisHelper.GetFromCacheAsync<DeploymentInfo?>(StartedCacheKey);
+            if (StartedChallengeInfo != null)
+            {
+                return Ok(new GenaralViewResponseData<string>()
+                {
+                    IsSuccess = true,
+                    Message = "Start challenge successfully",
+                    data = StartedChallengeInfo.DeploymentDomainName,
+                });
+            }
+
+            #endregion
 
             //Phục vụ việc trả về Bad Request
             string ErrorMessage = "Failed to start the challenge. An error occurred during initialization. Please wait a few moments and try again.";
-            int TeamId = instanceInfo.TeamId;
-            int ChallengeId = instanceInfo.ChallengeId;
             string DeploymentDomainName = "";
+            List<int> StartedChallengeIds = redisHelper.GetKeysByPattern($"{RedisConfigs.RedisStartedChallengeKey}_*_{TeamId}").Select(x => int.Parse(Regex.Match(x, $"(?<={RedisConfigs.RedisStartedChallengeKey}_).*?(?=_{TeamId})").ToString())).ToList();
+            await Console.Out.WriteLineAsync(JsonConvert.SerializeObject(redisHelper.GetKeysByPattern($"{RedisConfigs.RedisStartedChallengeKey}_*_{TeamId}")));
 
             try
             {
-                #region Kiểm tra xem đã max instance được phép chạy đồng thời hay chưa
-                lock (_lock)
+                //If TeamId is -1, skip check max instance
+                if (TeamId != -1)
                 {
-                    if (!TeamDeployQueue.ContainsKey(TeamId))
+                    #region Kiểm tra xem đã max instance được phép chạy đồng thời hay chưa
+                    lock (_lock)
                     {
-                        TeamDeployQueue[TeamId] = new(ServiceConfigs.MaxInstanceAtTime);
+                        if (!TeamDeployQueue.ContainsKey(TeamId))
+                        {
+                            TeamDeployQueue[TeamId] = new(ServiceConfigs.MaxInstanceAtTime - StartedChallengeIds.Count);
+                        }
+                    }
+
+                    await Console.Out.WriteLineAsync("TeamDeployQueue[TeamId].CurrentCount: " + TeamDeployQueue[TeamId].CurrentCount.ToString());
+                    if (!await TeamDeployQueue[TeamId].WaitAsync(0))
+                    {
+                        return BadRequest(new GenaralViewResponseData<List<int>>()
+                        {
+                            Message = $"Each team is allowed to use a maximum of {ServiceConfigs.MaxInstanceAtTime} instances at the same time. Please turn off other instances before starting this challenge.",
+                            IsSuccess = false,
+                            data = StartedChallengeIds
+                        });
                     }
                 }
-
-                if (!await TeamDeployQueue[TeamId].WaitAsync(0))
-                {
-                    List<int> StartedChallengeIds = redisHelper.GetKeysByPattern($"{RedisConfigs.RedisStartedChallengeKey}_*_{TeamId}").Select(x => int.Parse(Regex.Match(x, $"(?<={RedisConfigs.RedisStartedChallengeKey}_).*?(_{TeamId})").ToString())).ToList();
-                    return BadRequest(new GenaralViewResponseData<List<int>>()
-                    {
-                        Message = $"Each team is allowed to use a maximum of {ServiceConfigs.MaxInstanceAtTime} instances at the same time. Please turn off other instances before starting this challenge.",
-                        IsSuccess = false,
-                        data = StartedChallengeIds
-                    });
-                }
                 #endregion
-
-                await TeamDeployQueue[TeamId].WaitAsync();
 
                 #region Check xem challenge đã được deploy chưa
                 string redisDeployKey = $"{RedisConfigs.RedisDeployKey}{instanceInfo.ChallengeId}";
@@ -359,22 +379,6 @@ namespace ControlCenterServer.Controllers
                         IsSuccess = false
                     });
                 }
-                #endregion
-
-                #region Check cache xem đã có thông tin deployment info của challenge id + team id chưa, nếu có thì trả về luôn không gọi qua
-
-                string StartedCacheKey = $"{RedisConfigs.RedisStartedChallengeKey}_{ChallengeId}_{TeamId}";
-                DeploymentInfo? StartedChallengeInfo = await redisHelper.GetFromCacheAsync<DeploymentInfo?>(StartedCacheKey);
-                if (StartedChallengeInfo != null)
-                {
-                    return Ok(new GenaralViewResponseData<string>()
-                    {
-                        IsSuccess = true,
-                        Message = "Start challenge successfully",
-                        data = StartedChallengeInfo.DeploymentDomainName,
-                    });
-                }
-
                 #endregion
 
                 #region Call to Challenge Hosting Platform to start challenge
@@ -452,6 +456,7 @@ namespace ControlCenterServer.Controllers
             }
             catch (Exception ex)
             {
+                TeamDeployQueue[TeamId].Release();
                 await Console.Out.WriteLineAsync("Error in Start Instance: " + ex.Message);
                 if (instanceInfo.TeamId == -1)
                 {

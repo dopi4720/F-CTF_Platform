@@ -31,6 +31,7 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
+                                        <th>STT</th>
                                         <th>Challenge Name</th>
                                         <th>Team Name</th>
                                         <th>CPU Usage</th>
@@ -83,6 +84,7 @@
         })
             .then(response => response.json())
             .then(data => {
+                sttCounter  = 1;
                 const currentTime = new Date().toLocaleTimeString();
 
                 // Kiểm tra dữ liệu hợp lệ
@@ -106,6 +108,8 @@
 
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
+                    
+                    <td>${sttCounter}</td>
                     <td>${entry.ChallengeName}</td>
                     <td>${entry.TeamName}</td>
                     <td>${cpuUsage} %</td>
@@ -115,10 +119,6 @@
                     tableBody.appendChild(newRow);
                     sttCounter++;
 
-                    // Giới hạn số lượng dòng trong bảng
-                    if (tableBody.rows.length > 20) {
-                        tableBody.deleteRow(0);  // Remove the oldest row if table exceeds 20 rows
-                    }
                 });
 
                 // Giới thiệu sự kiện cho các nút "Stop"

@@ -131,12 +131,13 @@ def challenge_start(payload, headers, api_start, challenge, challenge_time, cach
         else:
             message = res_data.get("message")
             if res_data.get("data"):
-                message += " Running challenge is:"
+                message += "<br><br>Running challenge is: "
+                challenge_names = []
                 for item in res_data.get("data"):
                     challenges = Challenges.query.filter_by(id=item).first()
-                    if (challenges != None):
-                        challenge_name = challenges.name
-                    message += f" {challenge_name}, "
+                    if challenges is not None:
+                        challenge_names.append(f"<b>{challenges.name}</b>")
+                message += "<b>,</b> ".join(challenge_names)
             return format_response({"message": message})
 
     except requests.exceptions.RequestException as e:
