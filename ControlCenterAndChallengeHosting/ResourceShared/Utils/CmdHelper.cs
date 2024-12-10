@@ -32,7 +32,8 @@ namespace ResourceShared.Utils
 
                 if (IsNeedKctf)
                 {
-                    await process.StandardInput.WriteLineAsync($". kctf/activate");
+                    // await Console.Out.WriteLineAsync("source ne");
+                    await process.StandardInput.WriteLineAsync($"source kctf/activate && export PATH=$PATH:{ChallengeBasePath}/kctf/bin");
                     await process.StandardInput.FlushAsync();
                 }
 

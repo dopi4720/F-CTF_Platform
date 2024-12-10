@@ -21,6 +21,8 @@ from CTFd.constants.envvars import (
     API_URL_CONTROLSERVER,
     HOST_CACHE,
 )
+from CTFd.utils.connector.multiservice_connector import challenge_start, create_secret_key, force_stop, generate_cache_attempt_key, generate_cache_key, get_team_id_and_cache_key, get_token_from_header, prepare_challenge_payload
+
 from CTFd.constants.config import ChallengeVisibilityTypes, Configs
 from CTFd.utils.config import is_teams_mode
 from CTFd.utils.dates import ctf_ended, ctf_paused, ctf_started
@@ -209,7 +211,24 @@ def get_challenge_detail(challenge_id):
 def get_challenges_by_topic(category):
     try:
         challenges = Challenges.query.filter_by(category=category).all()
+        generatedToken = get_token_from_header()
+        token = Tokens.query.filter_by(value=generatedToken).first()
+        user_id = token.user_id
+        user = Users.query.filter_by(id=user_id).first()
+        team_id = user.team_id
+        if not token:
+            return jsonify({"error": "Token not found"}), 404
+        else:
+            solve_id = (
+            Solves.query.with_entities(Solves.challenge_id)
+            .filter(Solves.team_id == team_id) 
+            .all() 
+            )
 
+        solve_by_myteam = False
+        if(solve_id):
+            solve_by_myteam = True
+        
         topics_data = [
             {
                 "id": challenge.id,
@@ -222,6 +241,7 @@ def get_challenges_by_topic(category):
                 "type": challenge.type,
                 "requirements": challenge.requirements,
                 "time_limit": challenge.time_limit,
+                "solve_by_myteam":solve_by_myteam,
             }
             for challenge in challenges
             if challenge.state != "hidden"
@@ -241,6 +261,10 @@ def get_challenges_by_topic(category):
 def challenge_by_topic():
     if is_banned():
         return jsonify({'message': 'You have been banned from CTFd', 'success':False}), 403
+
+        solve_by_myteam = False
+        if(solve_id):
+            solve_by_myteam = True
     try:
         distinct_categories = (
             Challenges.query

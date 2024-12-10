@@ -747,7 +747,7 @@ const ChallengeDetail = () => {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {challenge?.attemps >= challenge?.max_attempts && challenge?.max_attempts !== 0 && (
+                            {challenge?.attemps >=challenge?.max_attempts && challenge?.max_attempts !== 0 && !isSubmitted &&(
                                 <div className="text-center">
                                     <span className="w-full py-3 px-6 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2 bg-theme-color-neutral cursor-not-allowed">You have reached the maximum number of submissions allowed.</span>
                                 </div>
@@ -770,7 +770,7 @@ const ChallengeDetail = () => {
                                     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                                 </div>
                             )}
-                            {(challenge?.attemps < challenge?.max_attempts || challenge?.max_attempts == 0) && (
+                            {(challenge?.attemps <= challenge?.max_attempts || challenge?.max_attempts == 0) && (
                                 <button
                                     onClick={handleSubmitFlag}
                                     type="submit"

@@ -5,12 +5,13 @@ using ChallengeManagementServer.Services;
 using ResourceShared.Configs;
 using ResourceShared.Utils;
 using StackExchange.Redis;
+using ChallengeManagementServer.Configs;
 
 namespace ChallengeManagementServer
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,12 @@ namespace ChallengeManagementServer
             builder.Services.AddScoped<IChallengeService, ChallengeService>();
             builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 
-            new ChallengeManagementConfigHelper().InitConfig();
+           new ChallengeManagementConfigHelper().InitConfig();
+
+// CmdHelper.ChallengeBasePath = ChallengeManagePathConfigs.ChallengeBasePath;
+//           var dadsfbgdsfg23ta= await  CmdHelper.ExecuteBashCommandAsync("","kubectl get pods",true);
+// Console.WriteLine(CmdHelper.ChallengeBasePath);
+// Console.WriteLine(dadsfbgdsfg23ta);
 
             // Cấu hình Redis
             builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(RedisConfigs.ConnectionString));

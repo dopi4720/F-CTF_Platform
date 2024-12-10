@@ -723,7 +723,7 @@ class ChallengeAttempt(Resource):
                             "message": "You have 0 tries remaining",
                         },
                     },
-                    403,
+                    400,
                 )
 
             status, message = chal_class.attempt(challenge, request)

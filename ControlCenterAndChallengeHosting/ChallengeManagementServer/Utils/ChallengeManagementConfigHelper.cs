@@ -23,7 +23,7 @@ namespace ChallengeManagementServer.Configs
 
             string memoryInKi = clusterAllocate.Status.Allocatable.Memory;
 
-            // Extract the numeric value and convert to long
+            //Extract the numeric value and convert to long
             long memoryInKiLong = long.TryParse(memoryInKi.Replace("Ki", ""), out var memoryAllocatable) ? memoryAllocatable
                 : throw new Exception("Invalid or missing configuration MemoryAllocatable");
            

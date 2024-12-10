@@ -74,7 +74,7 @@ def upload_file(challenge_id, file_path):
     challenge = Challenges.query.filter_by(id=challenge_id).first()
     
     if challenge.require_deploy:
-        notification_data = create_notification_data()
+        notification_data = create_notification_data(challenge.name)
     else:
         notification_data = None
     

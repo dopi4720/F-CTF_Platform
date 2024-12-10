@@ -212,12 +212,12 @@ def delete_cached_files(challenge_id):
     print(f"Deleted {deleted_count} cache entries for challenge_id: {challenge_id}")
 
 
-def create_notification_data():
+def create_notification_data(challenge_name):
     return {
-        "title": "Hello Everyone",
-        "content": "There seems to be an issue with the system. Please try again in a few minutes.",
+        "title": f"The challenge '{challenge_name}' is being redeployed",
+        "content": f"The challenge '{challenge_name}' is being redeployed. Please wait a few minutes",
         "date": time.time(),
-        "html": "<p>There seems to be an issue with the system. Please try again in a few minutes.</p>\n",
+        "html": f"<p>The challenge '<strong>{challenge_name}</strong>' is being redeployed. Please wait a few minutes</p>\n",
         "sound": True,
         "type": "toast",
     }
