@@ -21,6 +21,7 @@ from CTFd.constants.envvars import (
     API_URL_CONTROLSERVER,
     HOST_CACHE,
 )
+from sqlalchemy import func
 from CTFd.utils.connector.multiservice_connector import challenge_start, create_secret_key, force_stop, generate_cache_attempt_key, generate_cache_key, get_team_id_and_cache_key, get_token_from_header, prepare_challenge_payload
 
 from CTFd.constants.config import ChallengeVisibilityTypes, Configs
@@ -266,10 +267,14 @@ def get_challenges_by_topic(category):
 def challenge_by_topic():
     if is_banned():
         return jsonify({'message': 'You have been banned from CTFd', 'success':False}), 403
-
-        solve_by_myteam = False
-        if(solve_id):
-            solve_by_myteam = True
+    generatedToken = get_token_from_header()
+    token = Tokens.query.filter_by(value=generatedToken).first()
+    user_id = token.user_id
+    user = Users.query.filter_by(id=user_id).first()
+    team_id = user.team_id
+    if not token:
+        return jsonify({"error": "Token not found"}), 404
+    
     try:
         distinct_categories = (
             Challenges.query
@@ -278,9 +283,45 @@ def challenge_by_topic():
             .distinct()
             .all()
         )
+        
+        challenge_counts_by_topic = (
+            Challenges.query
+            .with_entities(Challenges.category, func.count(Challenges.id).label("challenge_count"))
+            .filter(Challenges.state != "hidden")
+            .group_by(Challenges.category)
+            .all()
+        )  
+        
+        # Tạo từ điển để dễ tra cứu số lượng challenges
+        challenge_count_dict = {category: count for category, count in challenge_counts_by_topic}
 
-        # Format the response
-        topics_data = [{"topic_name": category[0]} for category in distinct_categories]
+        # Thêm số lượng challenges vào topics_data
+        topics_data = []  
+        
+        for category in distinct_categories:
+            topic_name = category[0]
+            solved_challenges = (
+            Solves.query
+            .join(Challenges, Solves.challenge_id == Challenges.id)
+            .filter(
+                Solves.team_id == team_id,
+                Challenges.category == topic_name,
+                Challenges.state != "hidden"
+            )
+            .distinct(Challenges.id)
+            .count()
+            )
+            
+            challenge_count_by_topic= challenge_count_dict.get(category[0], 0)
+            cleared = False
+            if solved_challenges >= challenge_count_by_topic:
+                cleared = True
+            data = {
+                "topic_name": topic_name,
+                "challenge_count": challenge_count_by_topic,
+                "cleared": cleared
+            }
+            topics_data.append(data)
 
         return jsonify({"success": True, "data": topics_data}), 200
 
