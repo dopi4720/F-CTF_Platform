@@ -229,25 +229,26 @@ def get_challenges_by_topic(category):
                 solve_id = (
                 Solves.query.with_entities(Solves.challenge_id)
                 .filter(Solves.team_id == team_id) 
-                .all()
+                .filter(Solves.challenge_id == challenge.id)  
+                .first() 
                 )
-
+                
                 solve_by_myteam = False
-                if solve_id:
+                if(solve_id):
                     solve_by_myteam = True
-                    
                 challenge_data = {
-                    "id": challenge.id,
-                    "name": challenge.name,
-                    "description": modify_description(challenge),
-                    "max_attempts": challenge.max_attempts,
-                    "category": challenge.category,
-                    "time_limit": challenge.time_limit,
-                    "require_deploy": challenge.require_deploy,
-                    "type": challenge.type,
-                    "next_id": challenge.next_id,
-                    "solve_by_myteam": solve_by_myteam,
-                }
+                        "id": challenge.id,
+                        "name": challenge.name,
+                        "next_id": challenge.next_id,
+                        "max_attempts": challenge.max_attempts,
+                        "value": challenge.value,
+                        "category": challenge.category,
+                        "time_limit": challenge.time_limit,
+                        "type": challenge.type,
+                        "requirements": challenge.requirements,
+                        "time_limit": challenge.time_limit,
+                        "solve_by_myteam":solve_by_myteam,
+                    }
                 topics_data.append(challenge_data)  
                 
 
