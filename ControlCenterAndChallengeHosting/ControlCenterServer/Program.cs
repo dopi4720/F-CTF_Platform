@@ -41,8 +41,8 @@ namespace ControlCenterServer
 
             app.MapControllers();
 
-            //app.Run($"{ServiceConfigs.ServerHost}:{ServiceConfigs.ServerPort}");
-            app.Run();
+            app.Run($"{ServiceConfigs.ServerHost}:{ServiceConfigs.ServerPort}");
+            //app.Run();
         }
     }
 }
