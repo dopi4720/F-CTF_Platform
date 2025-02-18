@@ -87,7 +87,7 @@ pre {
   /*background: #f0f0f0;*/
   /*color: #aaa;*/
   font-weight: 400;
-  font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "Space Mono", monospace;
   -webkit-appearance: none;
 }
 
@@ -109,8 +109,8 @@ input[type="checkbox"] {
 
 .card-radio:checked + .card {
   background-color: transparent !important;
-  border-color: #a3d39c;
-  box-shadow: 0 0 0 0.1rem #a3d39c;
+  border-color: #ff884d;
+  box-shadow: 0 0 0 0.1rem #ff884d;
   transition:
     background-color 0.3s,
     border-color 0.3s;

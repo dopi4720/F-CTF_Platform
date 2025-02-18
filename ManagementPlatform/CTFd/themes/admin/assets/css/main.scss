@@ -9,12 +9,12 @@
 html,
 body,
 .container {
-  font-family: "Lato", "LatoOffline", sans-serif;
+  font-family: "Space Mono", monospace;
 }
 
 h1,
 h2 {
-  font-family: "Raleway", "RalewayOffline", sans-serif;
+  font-family: "Space Mono", monospace;
   font-weight: 500;
   letter-spacing: 2px;
 }
@@ -52,13 +52,15 @@ blockquote {
 
 .jumbotron {
   border-radius: 0;
-  text-align: center;
+  background-color: #ffffff;
+  text-transform: uppercase;
+  color: #ff5500;
 }
 
 .form-control:focus {
   background-color: transparent;
-  border-color: #a3d39c;
-  box-shadow: 0 0 0 0.1rem #a3d39c;
+  border-color: #f9f3f1;
+  box-shadow: 0 0 0 0.1rem #f9f3f1;
   transition:
     background-color 0.3s,
     border-color 0.3s;
@@ -157,4 +159,90 @@ blockquote {
   vertical-align: top;
   margin-left: -1.5em;
   font-size: 50%;
+}
+
+.rotate {
+  transform: rotate(90deg);
+}
+
+.angled-line {
+  width: 100%;
+  height: 10px; /* Adjust height as needed */
+  background: linear-gradient(
+    to right,
+    #f5b8a6,
+    #f5b8a6
+  ); /* Set desired color */
+  transform: skewY(-2deg); /* Adjust skew angle */
+  transform-origin: top left;
+}
+
+// Override the default heading margin
+h1 {
+  margin-bottom: 0 !important;
+}
+
+h1 + svg {
+  margin-top: -1rem !important;
+}
+
+.jumbotron {
+  margin-bottom: 1rem;
+}
+
+.jumbotron .container {
+  margin-bottom: 1rem;
+}
+
+.statistics-text h5 b {
+  color: #ff5500;
+}
+
+.btn-outline-primary {
+  color: #ff5500;
+  border-color: #ff5500;
+}
+.btn-outline-primary:hover {
+  color: #fff;
+  background-color: #ff5500;
+  border-color: #ff5500;
+}
+
+.form-check-input:checked {
+  background-color: #ff5500;
+  border-color: #ff5500;
+}
+
+.table .thead-light th {
+  background-color: #f9f3f1;
+}
+
+.tooltip {
+  font-family: "Space Mono", monospace;
+}
+
+option:hover {
+  background-color: #ff5500;
+}
+
+.col-title {
+  display: block;
+  background-color: #f7cfbe;
+  border: solid 1px #ff5500;
+  color: #ff5500;
+  margin-bottom: 50px;
+}
+
+.container-fluid,
+.container {
+  margin-bottom: 2rem;
+}
+
+.nav-tabs .nav-link {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.nav-link.active {
+  background-color: #ff5500 !important;
 }
