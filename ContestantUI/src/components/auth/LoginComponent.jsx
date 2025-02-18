@@ -1,9 +1,13 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { API_GET_REGISTER_STATE, BASE_URL, LOGIN_PATH } from "../../constants/ApiConstant";
+import {
+  API_GET_REGISTER_STATE,
+  BASE_URL,
+  LOGIN_PATH,
+} from "../../constants/ApiConstant";
 import { ACCESS_TOKEN_KEY } from "../../constants/LocalStorageKey";
 import ApiHelper from "../../utils/ApiHelper";
 
@@ -11,19 +15,19 @@ const LoginComponent = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
-    password: ""
+    password: "",
   });
   const [errors, setErrors] = useState({
     username: "",
-    password: ""
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isRegisterVisible, setIsRegisterVisible]= useState(false)
+  const [isRegisterVisible, setIsRegisterVisible] = useState(false);
 
   useEffect(() => {
     if (localStorage.getItem(ACCESS_TOKEN_KEY)) {
-      navigate('/');
+      navigate("/");
     }
   }, [navigate]);
 
@@ -38,7 +42,10 @@ const LoginComponent = () => {
           console.error("Failed to get registration config:", response.error);
         }
       } catch (error) {
-        console.error("An error occurred while fetching registration config:", error);
+        console.error(
+          "An error occurred while fetching registration config:",
+          error
+        );
       }
     };
     getRegisterState();
@@ -59,17 +66,17 @@ const LoginComponent = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     if (name === "username") {
       setErrors((prev) => ({
         ...prev,
-        username: validateUsername(value)
+        username: validateUsername(value),
       }));
     } else if (name === "password") {
       setErrors((prev) => ({
-        ...prev
+        ...prev,
       }));
     }
   };
@@ -79,7 +86,7 @@ const LoginComponent = () => {
     const usernameError = validateUsername(formData.username);
     if (usernameError) {
       setErrors({
-        username: usernameError
+        username: usernameError,
       });
       return;
     }
@@ -93,49 +100,55 @@ const LoginComponent = () => {
       if (response.status === 200) {
         localStorage.setItem(ACCESS_TOKEN_KEY, response.data.generatedToken);
         console.log("Login successful");
-        navigate('/');
-      }else if (response.status === 400) {
+        navigate("/");
+      } else if (response.status === 400) {
         const errorMessage =
-          response.data.msg || response.data.message || 'Invalid input. Please check and try again!';
-  
-        if (errorMessage.toLowerCase().includes('team')) {
-          
+          response.data.msg ||
+          response.data.message ||
+          "Invalid input. Please check and try again!";
+
+        if (errorMessage.toLowerCase().includes("team")) {
           Swal.fire({
-            title: 'Team Confirmation Required',
+            title: "Team Confirmation Required",
             text: errorMessage,
-            icon: 'info',
-            confirmButtonText: 'To the Team Confirm Page',
+            icon: "info",
+            confirmButtonText: "To the Team Confirm Page",
           }).then(() => {
-            localStorage.setItem(ACCESS_TOKEN_KEY, response.data.generatedToken);
-            navigate('/team-confirm');
+            localStorage.setItem(
+              ACCESS_TOKEN_KEY,
+              response.data.generatedToken
+            );
+            navigate("/team-confirm");
           });
         } else {
-          
           Swal.fire({
-            title: 'Login Failed!',
+            title: "Login Failed!",
             text: errorMessage,
-            icon: 'error',
-            confirmButtonText: 'GOT IT!',
+            icon: "error",
+            confirmButtonText: "GOT IT!",
           });
         }
       } else {
-        
         Swal.fire({
-          title: 'Login Failed!',
-          text: response.data.msg || response.data.message || 'Unexpected error occurred. Please try again!',
-          icon: 'error',
-          confirmButtonText: 'GOT IT!',
+          title: "Login Failed!",
+          text:
+            response.data.msg ||
+            response.data.message ||
+            "Unexpected error occurred. Please try again!",
+          icon: "error",
+          confirmButtonText: "GOT IT!",
         });
       }
-    
     } catch (error) {
       Swal.fire({
-        title: 'Login Fail!',
-        text: error.response.data.msg || error.response.data.message || 'Invalid username or password. Please try again!',
-        icon:'error',
-        confirmButtonText:'GOT IT!'
-      }
-    )
+        title: "Login Fail!",
+        text:
+          error.response.data.msg ||
+          error.response.data.message ||
+          "Invalid username or password. Please try again!",
+        icon: "error",
+        confirmButtonText: "GOT IT!",
+      });
       console.error("Login failed:", error);
     } finally {
       setIsLoading(false);
@@ -162,7 +175,9 @@ const LoginComponent = () => {
               name="username"
               value={formData.username}
               onChange={handleInputChange}
-              className={`mt-1 block w-full px-3 py-2 border ${errors.username ? "border-red-500" : "border-gray-300"} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+              className={`mt-1 block w-full px-3 py-2 border ${
+                errors.username ? "border-red-500" : "border-gray-300"
+              } rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
               aria-invalid={errors.username ? "true" : "false"}
               aria-describedby="username-error"
               autoComplete="username"
@@ -192,7 +207,9 @@ const LoginComponent = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className={`mt-1 block w-full px-3 py-2 border ${errors.password ? "border-red-500" : "border-gray-300"} rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
+                className={`mt-1 block w-full px-3 py-2 border ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                } rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200`}
                 aria-invalid={errors.password ? "true" : "false"}
                 aria-describedby="password-error"
                 autoComplete="current-password"
@@ -235,10 +252,7 @@ const LoginComponent = () => {
           <div className="mt-4 text-center">
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
-              <a
-                href="/register"
-                className="text-blue-600 hover:underline"
-              >
+              <a href="/register" className="text-blue-600 hover:underline">
                 Register here
               </a>
             </p>

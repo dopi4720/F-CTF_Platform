@@ -9,12 +9,14 @@ const HomePage = () => {
     days: 0,
     hours: 0,
     minutes: 0,
-    seconds: 0
+    seconds: 0,
   });
 
-  const [statusMessage, setStatusMessage] = useState("Loading contest details...");
+  const [statusMessage, setStatusMessage] = useState(
+    "Loading contest details..."
+  );
   const [isContestActive, setIsContestActive] = useState(false);
-  const [IsComing, setIsComming]= useState(false);
+  const [IsComing, setIsComming] = useState(false);
 
   useEffect(() => {
     const fetchDateConfig = async () => {
@@ -28,8 +30,8 @@ const HomePage = () => {
             const startDate = new Date(start_date * 1000);
             if (new Date() < startDate) {
               setStatusMessage("CONTEST IS COMING...");
-              setIsComming(true)
-              setIsContestActive(false)
+              setIsComming(true);
+              setIsContestActive(false);
               startCountdown(startDate);
             }
           } else if (message === "CTFd has been started" && end_date) {
@@ -68,14 +70,16 @@ const HomePage = () => {
       }
 
       const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const hours = Math.floor(
+        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      );
       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
       setTimeLeft({ days, hours, minutes, seconds });
     }, 1000);
 
-    return () => clearInterval(timer); 
+    return () => clearInterval(timer);
   };
 
   const TimeUnit = ({ value, label, icon }) => (
@@ -95,7 +99,9 @@ const HomePage = () => {
       >
         {String(value).padStart(2, "0")}
       </span>
-      <span className="text-theme-color-neutral text-sm uppercase">{label}</span>
+      <span className="text-theme-color-neutral text-sm uppercase">
+        {label}
+      </span>
     </div>
   );
 
@@ -106,10 +112,10 @@ const HomePage = () => {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-4xl md:text-6xl font-bold text-theme-color-primary-dark mb-4">
+        <h1 className="text-4xl md:text-6xl font-bold text-theme-color-secondary-dark mb-4">
           {statusMessage}
         </h1>
-        <p className="text-theme-color-neutral-content text-lg md:text-xl">
+        <p className="text-theme-color-secondary text-lg md:text-xl">
           {isContestActive
             ? "Get ready for an amazing experience! "
             : "Check back later for updates."}
@@ -124,8 +130,16 @@ const HomePage = () => {
         >
           <TimeUnit value={timeLeft.days} label="Days" icon={<FiCalendar />} />
           <TimeUnit value={timeLeft.hours} label="Hours" icon={<FiClock />} />
-          <TimeUnit value={timeLeft.minutes} label="Minutes" icon={<FiClock />} />
-          <TimeUnit value={timeLeft.seconds} label="Seconds" icon={<FiClock />} />
+          <TimeUnit
+            value={timeLeft.minutes}
+            label="Minutes"
+            icon={<FiClock />}
+          />
+          <TimeUnit
+            value={timeLeft.seconds}
+            label="Seconds"
+            icon={<FiClock />}
+          />
         </div>
       )}
 
@@ -137,22 +151,31 @@ const HomePage = () => {
         >
           <TimeUnit value={timeLeft.days} label="Days" icon={<FiCalendar />} />
           <TimeUnit value={timeLeft.hours} label="Hours" icon={<FiClock />} />
-          <TimeUnit value={timeLeft.minutes} label="Minutes" icon={<FiClock />} />
-          <TimeUnit value={timeLeft.seconds} label="Seconds" icon={<FiClock />} />
+          <TimeUnit
+            value={timeLeft.minutes}
+            label="Minutes"
+            icon={<FiClock />}
+          />
+          <TimeUnit
+            value={timeLeft.seconds}
+            label="Seconds"
+            icon={<FiClock />}
+          />
         </div>
       )}
-    
-    {IsComing && (
-      <motion.button
-        className="mt-12 px-8 py-4 bg-theme-color-primary text-white rounded-full font-bold text-lg shadow-lg hover:bg-theme-color-primary-dark focus:outline-none focus:ring-2 focus:ring-theme-color-primary focus:ring-opacity-50 transition-all duration-300"
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        aria-label="Register for the contest"
-      >
-        Register Now
-      </motion.button>)}
-      
-      <div className="mt-8 text-theme-color-neutral text-center">
+
+      {IsComing && (
+        <motion.button
+          className="mt-12 px-8 py-4 bg-theme-color-primary text-white rounded-full font-bold text-lg shadow-lg hover:bg-theme-color-primary-dark focus:outline-none focus:ring-2 focus:ring-theme-color-primary focus:ring-opacity-50 transition-all duration-300"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          aria-label="Register for the contest"
+        >
+          Register Now
+        </motion.button>
+      )}
+
+      <div className="mt-8 text-theme-color-secondary text-center">
         <p>Don't miss out on this opportunity!</p>
         <p className="mt-2">Mark your calendar and set your reminders.</p>
       </div>

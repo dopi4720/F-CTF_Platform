@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { BiTime } from "react-icons/bi";
 import { BsCheckCircle, BsClock, BsXCircle } from "react-icons/bs";
-import { FaExclamationCircle, FaPlus, FaSearch, FaTicketAlt, FaTimes } from "react-icons/fa";
+import {
+  FaExclamationCircle,
+  FaPlus,
+  FaSearch,
+  FaTicketAlt,
+  FaTimes,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { API_LIST_TICKET, API_TICKET_CREATE_BY_USER, BASE_URL } from "../../constants/ApiConstant";
+import {
+  API_LIST_TICKET,
+  API_TICKET_CREATE_BY_USER,
+  BASE_URL,
+} from "../../constants/ApiConstant";
 import ApiHelper from "../../utils/ApiHelper";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 const TicketList = () => {
   const [showModal, setShowModal] = useState(false);
@@ -27,12 +37,11 @@ const TicketList = () => {
       }
     } catch (err) {
       console.error("Error occurred:", err);
-      if(err.response.status===403){
-        setError("F-CTF has ended. Please wait until our new notification")
-      }else{
+      if (err.response.status === 403) {
+        setError("F-CTF has ended. Please wait until our new notification");
+      } else {
         setError("Could not load tickets. Please try again.");
       }
-      
     }
   };
 
@@ -48,7 +57,8 @@ const TicketList = () => {
     const matchesSearch =
       ticket.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ticket.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = filterStatus === "all" || ticket.status === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" || ticket.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -87,24 +97,30 @@ const TicketList = () => {
         // Success: Add the new ticket to the list
         setError(""); // Clear any previous errors
         Swal.fire({
-          title: 'Success',
-          text: 'Ticket sent successfully!',
-          icon: 'success',
-          confirmButtonText: 'OK',
+          title: "Success",
+          text: "Ticket sent successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
           customClass: {
-            confirmButton: 'rounded-md bg-theme-color-primary px-4 py-2 text-white transition-all hover:bg-theme-color-primary-dark focus:outline-none focus:ring-2 focus:ring-theme-color-primary focus:ring-offset-2',
+            confirmButton:
+              "rounded-md bg-theme-color-primary px-4 py-2 text-white transition-all hover:bg-theme-color-primary-dark focus:outline-none focus:ring-2 focus:ring-theme-color-primary focus:ring-offset-2",
           },
         });
         fetchTickets();
       } else {
         // Handle different error cases
-        const message = response.message || response.error || "Failed to send the ticket. Please try again.";
+        const message =
+          response.message ||
+          response.error ||
+          "Failed to send the ticket. Please try again.";
         setError(message);
-
       }
     } catch (err) {
       console.error("Error occurred:", err);
-      setError(err.response.data.message || "Failed to send the ticket. Please try again.");
+      setError(
+        err.response.data.message ||
+          "Failed to send the ticket. Please try again."
+      );
     }
   };
 
@@ -125,7 +141,7 @@ const TicketList = () => {
       )}
 
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-800">Support Tickets</h1>
+        <h1 className="text-2xl font-bold text-primary">Support Tickets</h1>
         <button
           onClick={handleCreateTicket}
           className="flex items-center gap-2 rounded-md bg-theme-color-primary px-4 py-2 text-white transition-all hover:bg-theme-color-primary-dark focus:outline-none focus:ring-2 focus:ring-theme-color-primary focus:ring-offset-2"
@@ -189,7 +205,9 @@ const TicketList = () => {
             </h3>
             <div className="flex items-center justify-between text-sm text-gray-500">
               <span>Created: {ticket.date}</span>
-              <span className="capitalize">{ticket.status.replace("_", " ")}</span>
+              <span className="capitalize">
+                {ticket.status.replace("_", " ")}
+              </span>
             </div>
           </div>
         ))}
