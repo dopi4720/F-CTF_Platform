@@ -18,5 +18,7 @@ namespace ChallengeManagementServer.ServiceInterfaces
         public Task<ClusterStatisticInfo> GetClusterCPUAndRAMUsage();
 
         public Task<List<PodStatisticInfo>> GetAllPodStatistic(IConnectionMultiplexer _connectionMultiplexer);
+
+        public Task<ClusterUsageByPercent> GetClusterUsageByPercent();
     }
 }

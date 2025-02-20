@@ -1,7 +1,6 @@
 ﻿using ChallengeManagementServer.DTO;
 using ChallengeManagementServer.Middlewares;
 using ChallengeManagementServer.ServiceInterfaces;
-using ControlCenterServer.Models;
 using Microsoft.AspNetCore.Mvc;
 using ResourceShared.Configs;
 using ResourceShared.DTOs;
@@ -57,9 +56,9 @@ namespace ChallengeManagementServer.Controllers
             try
             {
                 await Console.Out.WriteLineAsync("Get request to get statistic");
-                var clusterStatistic = await _performanceService.GetClusterCPUAndRAMUsage();
+                var clusterStatistic = await _performanceService.GetClusterUsageByPercent();
                 await Console.Out.WriteLineAsync("End request to get statistic");
-                return Ok(new GenaralViewResponseData<ClusterStatisticInfo>
+                return Ok(new GenaralViewResponseData<ClusterUsageByPercent>
                 {
                     IsSuccess = true,
                     Message = "Get Cluster Statistic Success",

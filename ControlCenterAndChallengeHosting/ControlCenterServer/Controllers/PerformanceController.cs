@@ -1,9 +1,8 @@
 ﻿using ControlCenterServer.Configs;
 using ControlCenterServer.Middlewares;
-using ControlCenterServer.Models;
+using ResourceShared.Models;
 using Microsoft.AspNetCore.Mvc;
 using ResourceShared.Configs;
-using ResourceShared.Models;
 using ResourceShared.ResponseViews;
 using ResourceShared.Utils;
 using RestSharp;

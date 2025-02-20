@@ -337,5 +337,34 @@ namespace ChallengeManagementServer.Services
             };
             return clusterStatisticInfo;
         }
+
+        public async Task<ClusterUsageByPercent> GetClusterUsageByPercent()
+        {
+            try
+            {
+                var output = await CmdHelper.ExecuteBashCommandAsync("", "kubectl top nodes", true);
+
+                string[] lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var line in lines)
+                {
+                    string[] columns = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (columns.Length >= 4 && columns[0] == "kctf-cluster-control-plane")
+                    {
+                        return new ClusterUsageByPercent
+                        {
+                            ServerId = MachineConfigs.ServerId,
+                            CpuUsage = Double.Parse(columns[2].Trim('%')),
+                            RamUsage = Double.Parse(columns[4].Trim('%'))
+                        };
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi lấy dữ liệu cluster usage: {ex.Message}");
+            }
+
+            return null;
+        }
     }
 }

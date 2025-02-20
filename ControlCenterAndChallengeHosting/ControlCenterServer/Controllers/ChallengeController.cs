@@ -1,7 +1,7 @@
 ﻿using ControlCenterServer.Configs;
 using ControlCenterServer.DTOs.ChallengeDTOs;
 using ControlCenterServer.Middlewares;
-using ControlCenterServer.Models;
+using ResourceShared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using ResourceShared.Configs;
@@ -53,7 +53,7 @@ namespace ControlCenterServer.Controllers
                 // neu chua deploy
                 if (redisGetDeployInfo == null)
                 {
-                    List<ClusterStatisticInfo> performanceStatList = new List<ClusterStatisticInfo>();
+                    List<ClusterUsageByPercent> performanceStatList = new List<ClusterUsageByPercent>();
                     foreach (ChallengeServerInfo challengeServerInfo in ControlCenterServiceConfig.ChallengeServerInfoList)
                     {
                         var request = new RestRequest();
@@ -68,7 +68,7 @@ namespace ControlCenterServer.Controllers
                         string baseUrl = challengeServerInfo.ServerHost + ":" + challengeServerInfo.ServerPort;
                         MultiServiceConnector multiServiceConnector = new MultiServiceConnector(baseUrl);
                         var response
-                          = await multiServiceConnector.ExecuteRequest<GenaralViewResponseData<ClusterStatisticInfo>>(request, requestDictionary, RequestContentType.Form);
+                          = await multiServiceConnector.ExecuteRequest<GenaralViewResponseData<ClusterUsageByPercent>>(request, requestDictionary, RequestContentType.Form);
                         if (response != null && !response.IsSuccess)
                         {
                             return BadRequest(response);
@@ -76,20 +76,20 @@ namespace ControlCenterServer.Controllers
 
                         if (response != null && response.data != null)
                         {
-                            ClusterStatisticInfo? performanceStatistic = response.data;
+                            ClusterUsageByPercent? performanceStatistic = response.data;
                             performanceStatList.Add(performanceStatistic!);
                         }
                     }
 
                     // uu tien nhung con host co cpu usage < 50% va con nhieu available memory 
                     var bestPerformanceHost = performanceStatList.Where(stat => stat.CpuUsage < 50)
-                    .OrderByDescending(stat => stat.RamAvailable)
+                    .OrderByDescending(stat => stat.RamUsage)
                     .FirstOrDefault();
 
                     // neu khong co nhung con co cpu usage < 50% thi uu tien nhung con co available memory > 20% va cpu usage min
                     if (bestPerformanceHost == null)
                     {
-                        bestPerformanceHost = performanceStatList.Where(stat => stat.RamAvailable / stat.RamTotal * 100 > 20)
+                        bestPerformanceHost = performanceStatList.Where(stat => stat.RamUsage > 20)
                         .OrderBy(stat => stat.CpuUsage)
                         .FirstOrDefault();
                     }

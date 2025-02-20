@@ -1,4 +1,4 @@
-﻿namespace ControlCenterServer.Models
+﻿namespace ResourceShared.Models
 {
     public class ClusterStatisticInfo
     {
@@ -15,6 +15,19 @@
 
     }
 
+    public class ClusterUsageByPercent
+    {
+        // By %
+        public double CpuUsage { get; set; }
+
+        // By Mi
+        public double RamUsage { get; set; }
+
+        public string ServerId { get; set; } = string.Empty;
+
+    }
+
+    
     public class PodStatisticInfo
     {
         public string PodName { get; set; } = string.Empty;
