@@ -1,5 +1,4 @@
 ﻿using ControlCenterServer.DTOs.ChallengeDTOs;
-using ControlCenterServer.Models;
 using ResourceShared.Configs;
 using ResourceShared.Models;
 using ResourceShared.Utils;

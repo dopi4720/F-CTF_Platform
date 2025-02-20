@@ -7,10 +7,9 @@ using ChallengeManagementServer.K8sServerResponse.GetPodStatisticResponseDTO;
 using ChallengeManagementServer.DTO.PerformanceStatDTO;
 using ChallengeManagementServer.ServiceInterfaces;
 using ChallengeManagementServer.Utils;
-using ControlCenterServer.Models;
+using ResourceShared.Models;
 using Newtonsoft.Json;
 using ResourceShared.Configs;
-using ResourceShared.Models;
 using ResourceShared.Utils;
 using SocialSync.Shared.Utils.ResourceShared.Utils;
 using StackExchange.Redis;
@@ -355,6 +354,7 @@ namespace ChallengeManagementServer.Services
                             ServerId = MachineConfigs.ServerId,
                             CpuUsage = Double.Parse(columns[2].Trim('%')),
                             RamUsage = Double.Parse(columns[4].Trim('%'))
+
                         };
                     }
                 }

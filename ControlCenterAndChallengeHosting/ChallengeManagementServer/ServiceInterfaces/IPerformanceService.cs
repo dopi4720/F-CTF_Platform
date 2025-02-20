@@ -1,5 +1,5 @@
 ﻿using ChallengeManagementServer.K8sServerResponse.GetClusterStatisticResponseDTO;
-using ControlCenterServer.Models;
+using ResourceShared.Models;
 using ChallengeManagementServer.DTO.PerformanceStatDTO;
 using StackExchange.Redis;
 
