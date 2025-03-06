@@ -1,5 +1,7 @@
+
 import hashlib
 import random
+
 import time
 from flask import Flask, render_template, request, jsonify
 import requests
@@ -17,10 +19,10 @@ from CTFd.utils.connector.multiservice_connector import monitoring_control
 def monitoring():
     return render_template("admin/monitoring.html")
 
+# @admin.route("/admin/monitoring_modify")
+# @admin_or_challenge_writer_only_or_jury
+# def monitoring_modify():
+#     return render_template("admin/monitoring_modify.html")
 
-# Modified API to include more metrics
-@admin.route("/api/performance", methods=["POST"])
-@admin_or_challenge_writer_only_or_jury
-@bypass_csrf_protection
-def machine_performance():
-    return monitoring_control()
+
+

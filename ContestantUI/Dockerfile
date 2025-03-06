@@ -1,20 +1,27 @@
-# Stage 1: Build stage
-FROM node:16 AS build
-
-# Set working directory
+# Sử dụng Node.js để build ứng dụng
+FROM node:16 AS builder
 WORKDIR /app
 
-# Copy package files and install dependencies
-COPY package*.json package-lock.json ./
+# Copy toàn bộ mã nguồn vào container
+COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy the rest of the application files
+# Copy phần còn lại của mã nguồn và build ứng dụng
 COPY . .
-
-# Build the React application
 RUN npm run build
 
-EXPOSE 3000
+# Sử dụng image nhẹ để chạy ứng dụng
+FROM node:16-alpine AS runner
+WORKDIR /app
 
-# Start Nginx server
-CMD ["node", "server.js"]
+# Cài đặt serve để phục vụ ứng dụng
+RUN npm install -g serve
+
+# Copy thư mục build từ giai đoạn builder
+COPY --from=builder /app/dist /app/dist
+
+# Chạy ứng dụng trên port 3000
+CMD ["serve", "-s", "dist", "-l", "3000"]
+
+# Expose port 3000
+EXPOSE 3000

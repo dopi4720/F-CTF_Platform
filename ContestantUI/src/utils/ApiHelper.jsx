@@ -2,7 +2,7 @@ import axios from "axios";
 import { ACCESS_TOKEN_KEY } from "../constants/LocalStorageKey";
 
 class ApiHelper {
-  constructor(baseURL) {
+  constructor(baseURL, needsAuth = true) {
     this.api = axios.create({
       baseURL: baseURL,
       headers: this._getAuthHeaders(),
@@ -15,19 +15,23 @@ class ApiHelper {
     });
 
     // Thêm interceptors.response để xử lý lỗi 401
-    this.api.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response && error.response.status === 401) {
-          window.location.href = "/login"; // Chuyển hướng đến trang đăng nhập
+    if (needsAuth) {
+      this.api.interceptors.response.use(
+        (response) => response,
+        (error) => {
+          if (error.response && error.response.status === 401) {
+            window.location.href = "/login"; // Chuyển hướng đến trang đăng nhập
+          }
+          if (error.response.status === 403) {
+            console.error(
+              "Access denied: You do not have permission to perform this action."
+            );
+            window.location.href = "/forbidden";
+          }
+          return Promise.reject(error);
         }
-        if (error.response.status === 403) {
-          console.error("Access denied: You do not have permission to perform this action.");
-          window.location.href = "/forbidden"; 
-        }
-        return Promise.reject(error);
-      }
-    );
+      );
+    }
   }
 
   _getAuthHeaders() {
@@ -83,17 +87,16 @@ class ApiHelper {
     }
   }
 
-  
   async patch(url, data = {}, additionalHeaders = {}) {
     try {
-        const headers = { ...this._getAuthHeaders(), ...additionalHeaders };
-        const response = await this.api.patch(url, data, { headers });
-        return response.data; // Directly return the parsed data
+      const headers = { ...this._getAuthHeaders(), ...additionalHeaders };
+      const response = await this.api.patch(url, data, { headers });
+      return response.data; // Directly return the parsed data
     } catch (error) {
-        console.error("PATCH request error:", error);
-        throw error; // Ensure errors propagate to the calling code
+      console.error("PATCH request error:", error);
+      throw error; // Ensure errors propagate to the calling code
     }
-}
+  }
 }
 
 export default ApiHelper;

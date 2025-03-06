@@ -1,6 +1,6 @@
-export const BASE_URL = "http://localhost:8000/";
+export const BASE_URL = "http://127.0.0.1:8000/";
 //export const MANAGEMENT_API_URL = 'https://admin.fctf.site';
-export const MANAGEMENT_API_URL = "http://localhost:8000/";
+export const MANAGEMENT_API_URL = "http://127.0.0.1:8000/";
 
 export const LOGIN_PATH = "/api/login-contestant";
 export const USER_DETAILS = "/api/v1/users";
@@ -54,3 +54,6 @@ export const API_GET_REGISTER_STATE = "/api/get_register_config";
 
 //notifications
 export const API_GET_NOTIFICATION = "/api/v1/notifications";
+
+//action_logs
+export const API_ACTION_LOGS = "api/v1/action_logs";
